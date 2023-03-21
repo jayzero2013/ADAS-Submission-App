@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">ADAS Submission Log</string>
+    <string name="qr_scanner">qr_scanner</string>
+    <string name="qr_generator">QR generator</string>
+    <string name="check_status">check_status</string>
+    <string name="log_print">log_print</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="school_name">School Name</string>
+    <string name="lr_type">LR Type</string>
+    <string name="school_head">School Head</string>
+</resources>

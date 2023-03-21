@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/button_scan"
+        android:icon="@drawable/baseline_qr_code_scanner_24"
+        android:title="@string/qr_scanner" />
+
+    <item
+        android:id="@+id/button_qr_gen"
+        android:icon="@drawable/baseline_gen_qr"
+        android:title="@string/qr_generator" />
+
+    <item
+        android:id="@+id/button_check_status"
+        android:icon="@drawable/baseline_check_status"
+        android:title="@string/check_status" />
+    <item
+        android:id="@+id/button_log_print"
+        android:icon="@drawable/baseline_print_24"
+        android:title="@string/log_print" />
+
+</menu>
