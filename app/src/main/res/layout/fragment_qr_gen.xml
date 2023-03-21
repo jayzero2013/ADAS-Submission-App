@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="50dp">
@@ -58,16 +57,27 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
+        android:id="@+id/gen_button"
         style="@style/ThemeOverlay.Material3.Button.ElevatedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Generate"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="@string/generate"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/til_lr_type"
-        app:layout_constraintVertical_bias="0.02"
+        android:layout_marginTop="10dp"
         app:layout_constraintWidth_percent=".4" />
+
+    <ImageView
+        android:id="@+id/qr_viewer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gen_button"
+        android:contentDescription="@string/qr_Imageview_description"
+        android:layout_marginTop="10dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
