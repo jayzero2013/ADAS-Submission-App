@@ -11,14 +11,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -37,10 +35,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class QrGenFragment : Fragment() {
-
-    companion object {
-        private const val REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 1
-    }
 
     private lateinit var binding: FragmentQrGenBinding
     private var lrtype: String? = ""
@@ -151,16 +145,16 @@ class QrGenFragment : Fragment() {
 
     private fun initAutoComplete() {
         val db = dbhelper?.readableDatabase
-        val sch_recent_data = dbhelper?.queryData(db, arrayOf("sch_name"))
-        val sch_head_recent_data = dbhelper?.queryData(db, arrayOf("sch_head"))
+        val schRecentData = dbhelper?.queryDataAtTable1(db, arrayOf("sch_name"))
+        val schHeadRecentData = dbhelper?.queryDataAtTable1(db, arrayOf("sch_head"))
 
-        sch_recent_data?.let {
+        schRecentData?.let {
             (binding.qrGenSchoolName as? MaterialAutoCompleteTextView)?.setSimpleItems(
                 it
             )
         }
 
-        sch_head_recent_data?.let {
+        schHeadRecentData?.let {
             (binding.qrGenSchoolHead as? MaterialAutoCompleteTextView)?.setSimpleItems(
                 it
             )
@@ -177,7 +171,7 @@ class QrGenFragment : Fragment() {
             )
         )
 
-        if (dbhelper?.insertDate(db, data)!! > -1) {
+        if (dbhelper?.insertDateAtTable1(db, data)!! > -1) {
             Log.d("SDP", "QR Gen Data Saved")
         } else {
             Log.e("SDP", "QR Gen Data Error")
@@ -195,13 +189,13 @@ class QrGenFragment : Fragment() {
             MaterialAlertDialogBuilder(requireContext())
                 .setIcon(R.drawable.baseline_qr_code_scanner_24)
                 .setMessage("Do you want to add today's date as DATE OF SUBMISSION?")
-                .setPositiveButton("Yes, proceed") { dialog, which ->
+                .setPositiveButton("Yes, proceed") { _, _ ->
                     drawQr(
                         "${binding.qrGenSchoolName.text}/${binding.qrGenSchoolHead.text}" +
                                 "/$lrtype/$date"
                     )
                 }
-                .setNegativeButton("No") { dialog, which ->
+                .setNegativeButton("No") { _, _ ->
                     drawQr(
                         "${binding.qrGenSchoolName.text}/${binding.qrGenSchoolHead.text}" +
                                 "/$lrtype"
@@ -249,7 +243,7 @@ class QrGenFragment : Fragment() {
             }
 
             override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                TODO("Not yet implemented")
+
             }
         }
 

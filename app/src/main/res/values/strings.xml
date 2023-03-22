@@ -15,6 +15,19 @@
     <string name="school_head_field">School Head Field</string>
     <string name="gen_qr_data">gen_qr_data</string>
     <string name="send_to_messenger">Send to messenger</string>
+    <string name="qrInfoTable">QRinfo</string>
+    <string name="submissionTable">SubmissionTable</string>
+    <string name="sch_name">sch_name</string>
+    <string name="sch_head">sch_head</string>
+    <string name="sch_id">sch_id</string>
+    <string name="lrType">lrType</string>
+    <string name="submDate">submDate</string>
+    <string name="releDate">releDate</string>
+    <string name="timesSubm">timesSubm</string>
+    <string name="submBy">submBy</string>
+    <string name="releWhom">releWhom</string>
+    <string name="submDiv">submDiv</string>
+    <string name="whenSubmDiv">whenSubmDiv</string>
 
     <string-array name="lr_types">
         <item>1st Quarter</item>
