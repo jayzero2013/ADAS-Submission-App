@@ -9,4 +9,18 @@
     <string name="school_name">School Name</string>
     <string name="lr_type">LR Type</string>
     <string name="school_head">School Head</string>
+    <string name="generate">Generate</string>
+    <string name="qr_Imageview_description">This will hold the QR code bitmap</string>
+    <string name="school_name_field">School Name Field</string>
+    <string name="school_head_field">School Head Field</string>
+    <string name="gen_qr_data">gen_qr_data</string>
+    <string name="send_to_messenger">Send to messenger</string>
+
+    <string-array name="lr_types">
+        <item>1st Quarter</item>
+        <item>2nd Quarter</item>
+        <item>3rd Quarter</item>
+        <item>4th Quarter</item>
+        <item>Additions</item>
+    </string-array>
 </resources>

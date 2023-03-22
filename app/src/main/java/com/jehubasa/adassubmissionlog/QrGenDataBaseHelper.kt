@@ -38,29 +38,22 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
         return -1
     }
 
-    fun queryData(db: SQLiteDatabase?, data: Array<String>): QrInfoDataClass{
-        val projection = arrayOf(SCH_ID, SCH_NAME, SCH_HEAD)
-
+    fun queryData(db: SQLiteDatabase?, column: Array<String>): Array<String?> {
+        var data: Array<String?> = arrayOf()
         val cursor = db?.query(
-            MY_TABLE, projection, "$SCH_NAME = ?",
-            data, null, null, null
+            MY_TABLE, column, null,
+            null, null, null, null
         )
 
         with(cursor) {
             while (this!!.moveToNext()) {
-                if (data[0] == getString(getColumnIndexOrThrow("sch_name"))) {
-                    return QrInfoDataClass(
-                        getInt(getColumnIndexOrThrow(SCH_ID)),
-                        getString(getColumnIndexOrThrow(SCH_NAME)),
-                        getString(getColumnIndexOrThrow(SCH_HEAD))
-                    )
-                    break
-                }
+                var s = getString(getColumnIndexOrThrow(column[0]))
+                if(!data.contains(s)){data += s}
             }
         }
 
         cursor?.close()
-        return QrInfoDataClass(null, null, null)
+        return data
 
     }
 
