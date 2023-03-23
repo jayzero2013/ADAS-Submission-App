@@ -32,7 +32,7 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
                 "$schName TEXT, $schHead TEXT)"
 
         val createTable2 = "CREATE TABLE $table2 (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "$schName2 TEXT, $lrType TEXT, $submDate TEXT, $releDate TEXT, $timesSubm TEXT, " +
+                "$schName2 TEXT, $lrType TEXT, $submDate TEXT, $releDate TEXT, $timesSubm INT, " +
                 "$submBy TEXT, $releWhom TEXT, $submDiv TEXT, $whenSubmDiv TEXT)"
         db?.execSQL(createTable)
         db?.execSQL(createTable2)
@@ -64,7 +64,7 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
 
         with(cursor) {
             while (this!!.moveToNext()) {
-                var s = getString(getColumnIndexOrThrow(column[0]))
+                val s = getString(getColumnIndexOrThrow(column[0]))
                 if (!data.contains(s)) {
                     data += s
                 }
@@ -118,13 +118,13 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
 //
 //    }
 
-    fun updateDataAtTable2(db: SQLiteDatabase?, data: Array<QrInfoDataClass>): Int? {
-        val values = ContentValues().apply {
-            put(schName, data[0].sch_name)
-            put(schHead, data[0].sch_head)
-        }
-        val selection = "$schId=?"
-        return db?.update(table2, values, selection, arrayOf(data[0].sch_id.toString()))
-    }
+//    fun updateDataAtTable2(db: SQLiteDatabase?, data: Array<QrInfoDataClass>): Int? {
+//        val values = ContentValues().apply {
+//            put(schName, data[0].sch_name)
+//            put(schHead, data[0].sch_head)
+//        }
+//        val selection = "$schId=?"
+//        return db?.update(table2, values, selection, arrayOf(data[0].sch_id.toString()))
+//    }
 
 }

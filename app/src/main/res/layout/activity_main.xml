@@ -6,12 +6,28 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:titleTextColor="@color/white"
+        app:title="@string/app_name"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/navFragmentContainer"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@color/design_default_color_primary"
+        />
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/navFragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/navBar"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        tools:layout="@layout/fragment_qr_gen"
         app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView

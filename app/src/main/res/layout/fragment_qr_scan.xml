@@ -1,12 +1,296 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent">
 
-    <androidx.camera.view.PreviewView
-        android:id="@+id/preview_view"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"/>
+        android:layout_height="wrap_content">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/camera_card_view"
+            style="@style/Widget.Material3.CardView.Elevated"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="50dp"
+            app:cardCornerRadius="30dp"
+            app:cardElevation="2dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent=".8">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/qr_scan_reopen"
+                    android:layout_width="50dp"
+                    android:layout_height="0dp"
+                    android:elevation="4dp"
+                    android:src="@drawable/baseline_refresh_24"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:contentDescription="@string/reopen_camera_button" />
+
+                <ImageView
+                    android:id="@+id/qr_scan_tint"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:alpha=".5"
+                    android:background="@color/design_default_color_primary"
+                    android:elevation="2dp"
+                    android:contentDescription="@string/just_a_tint_if_the_camera_is_disabled"/>
+
+                <androidx.camera.view.PreviewView
+                    android:id="@+id/preview_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:rotation="0"
+                    app:implementationMode="compatible" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:id="@+id/form_section"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/camera_card_view">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/design_default_color_primary"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <TextView
+                    android:id="@+id/qr_scan_school_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-black"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    tools:text="Kabacan Pilot Elementary School" />
+
+                <TextView
+                    android:id="@+id/qr_scan_head"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-thin"
+                    android:textColor="@color/white"
+                    tools:text="Juan Pocio Luan" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#B9D1FB"
+                android:gravity="start"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/type_of_liquidation_report" />
+
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/qr_scan_1q"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/_1st" />
+
+                    <RadioButton
+                        android:id="@+id/qr_scan_2q"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/_2nd" />
+
+                    <RadioButton
+                        android:id="@+id/qr_scan_3q"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/_3rd" />
+
+                    <RadioButton
+                        android:id="@+id/qr_scan_4q"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/_4th" />
+
+                    <RadioButton
+                        android:id="@+id/qr_scan_add"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/additional" />
+                </RadioGroup>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_qr_scan_date_submission"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:hint="@string/date_of_submission"
+                    app:endIconContentDescription="@string/calendar_picker_desc"
+                    app:endIconDrawable="@drawable/baseline_calendar_month_24"
+                    app:endIconMode="custom">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/qr_scan_date_submission"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        tools:text="03/23/2023" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_qr_scan_date_release"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:hint="@string/date_of_release"
+                    app:endIconContentDescription="@string/calendar_picker_desc"
+                    app:endIconDrawable="@drawable/baseline_calendar_month_24"
+                    app:endIconMode="custom">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/qr_scan_date_release"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        tools:text="03/23/2023" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:hint="@string/submitted_by"
+                    app:endIconMode="clear_text">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/qr_scan_submitted_by"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:text="1" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <CheckBox
+                    android:id="@+id/qr_scan_released_to_same_person_checkbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/released_to_same_person"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/released_to"
+                    app:endIconMode="clear_text">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/qr_scan_released_to"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        tools:text="1" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity=""
+                    android:orientation="horizontal">
+
+                    <CheckBox
+                        android:id="@+id/qr_scan_submitted_div_check_box"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp"
+                        android:text="@string/submitted_to_division" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_qr_scan_submitted_division_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="@string/division_submission_date"
+                        android:visibility="invisible"
+                        app:endIconMode="clear_text">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/qr_scan_submitted_division_date"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            tools:text="1" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/qr_scan_save"
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@id/til_qr_scan_times"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="21dp"
+                        android:layout_marginBottom="5dp"
+
+                        android:text="@string/save" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_qr_scan_times"
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="@string/times_submitted"
+                        app:endIconMode="clear_text">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/qr_scan_times_submitted"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            tools:text="1"
+                            android:inputType="number"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+                </RelativeLayout>
+
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

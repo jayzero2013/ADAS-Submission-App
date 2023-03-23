@@ -28,6 +28,25 @@
     <string name="releWhom">releWhom</string>
     <string name="submDiv">submDiv</string>
     <string name="whenSubmDiv">whenSubmDiv</string>
+    <string name="save">save</string>
+    <string name="released_to">Released to</string>
+    <string name="submitted_by">Submitted by</string>
+    <string name="date_of_release">Date of release</string>
+    <string name="date_of_submission">Date of submission</string>
+    <string name="type_of_lr">Type of LR</string>
+    <string name="type_of_liquidation_report">Type of liquidation report:</string>
+    <string name="times_submitted">Times submitted</string>
+    <string name="submitted_to_division">Submitted to division</string>
+    <string name="division_submission_date">Division submission date</string>
+    <string name="calendar_picker_desc">when click calendar picker will open.</string>
+    <string name="released_to_same_person">Released to same person</string>
+    <string name="reopen_camera_button">Reopen camera button</string>
+    <string name="just_a_tint_if_the_camera_is_disabled">just a tint if the camera is disabled</string>
+    <string name="_1st">1st</string>
+    <string name="_2nd">2nd</string>
+    <string name="_3rd">3rd</string>
+    <string name="_4th">4th</string>
+    <string name="additional">Additional</string>
 
     <string-array name="lr_types">
         <item>1st Quarter</item>
