@@ -9,4 +9,9 @@
     <color name="white">#FFFFFFFF</color>
     <color name="neutral">#969696</color>
     <color name="very_light_white">#F7E6E5</color>
+    <color name="colorPrimary">#344955</color>
+    <color name="colorPrimaryVariant">#232F3f</color>
+    <color name="colorOnPrimary">#4A6572</color>
+    <color name="colorSecondary">#F9aa33</color>
+    <color name="colorSecondaryVariant">#FD9C09</color>
 </resources>

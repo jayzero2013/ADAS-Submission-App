@@ -104,16 +104,21 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
         val data: MutableList<SubmissionDataClass> = mutableListOf()
 
         with(cursor) {
-            while(this!!.moveToNext()){
-                data.add(SubmissionDataClass(getString(getColumnIndexOrThrow(schName2)),
-                    getString(getColumnIndexOrThrow(lrType)),
-                    getString(getColumnIndexOrThrow(submDate)),
-                    getString(getColumnIndexOrThrow(releDate)),
-                    getInt(getColumnIndexOrThrow(timesSubm)),
-                    getString(getColumnIndexOrThrow(submBy)),
-                    getString(getColumnIndexOrThrow(releWhom)),
-                    getString(getColumnIndexOrThrow(submDiv)),
-                    getString(getColumnIndexOrThrow(whenSubmDiv))))
+            while (this!!.moveToNext()) {
+                data.add(
+                    SubmissionDataClass(
+                        getInt(getColumnIndexOrThrow("id")),
+                        getString(getColumnIndexOrThrow(schName2)),
+                        getString(getColumnIndexOrThrow(lrType)),
+                        getString(getColumnIndexOrThrow(submDate)),
+                        getString(getColumnIndexOrThrow(releDate)),
+                        getInt(getColumnIndexOrThrow(timesSubm)),
+                        getString(getColumnIndexOrThrow(submBy)),
+                        getString(getColumnIndexOrThrow(releWhom)),
+                        getString(getColumnIndexOrThrow(submDiv)),
+                        getString(getColumnIndexOrThrow(whenSubmDiv))
+                    )
+                )
             }
         }
 
@@ -121,13 +126,20 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
         return data
     }
 
-//    fun updateDataAtTable2(db: SQLiteDatabase?, data: Array<QrInfoDataClass>): Int? {
-//        val values = ContentValues().apply {
-//            put(schName, data[0].sch_name)
-//            put(schHead, data[0].sch_head)
-//        }
-//        val selection = "$schId=?"
-//        return db?.update(table2, values, selection, arrayOf(data[0].sch_id.toString()))
-//    }
+    fun updateDataAtTable2(db: SQLiteDatabase?, id: Int?, d: SubmissionDataClass?): Int? {
+        val values = ContentValues().apply {
+            put(schName2, d?.Sch)
+            put(lrType, d?.typ)
+            put(submDate, d?.ds)
+            put(releDate, d?.dr)
+            put(timesSubm, d?.tos)
+            put(submBy, d?.sb)
+            put(releWhom, d?.rt)
+            put(submDiv, d?.sd)
+            put(whenSubmDiv, d?.tsd)
+        }
+        val selection = "id=?"
+        return db?.update(table2, values, selection, arrayOf(id.toString()))
+    }
 
 }

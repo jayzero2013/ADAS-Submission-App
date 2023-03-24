@@ -10,7 +10,7 @@ class RecyclerAdapterQrScan(val data: List<SubmissionDataClass>) :
     RecyclerView.Adapter<RecyclerAdapterQrScan.VH>() {
 
     private lateinit var binding: RecyclerOldDataBinding
-    private var listener : OnItemDialogClickLister? =null
+    private var listener: OnItemDialogClickLister? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         binding = RecyclerOldDataBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -24,8 +24,26 @@ class RecyclerAdapterQrScan(val data: List<SubmissionDataClass>) :
     override fun onBindViewHolder(holder: VH, position: Int) {
         binding.recyclerSchName.text = data[position].Sch
         binding.recyclerLrType.text = data[position].typ
-        binding.recyclerTimesSubmit.text = data[position].tos.toString()
         binding.recyclerDivStatus.text = data[position].sd
+        binding.recyclerTimesSubmit.text = data[position].tos.toString()
+        when (data[position].tos) {
+            1 -> {
+                binding.recyclerTimesSubmit.text = ("${data[position].tos}st submit")
+            }
+            2 -> {
+                binding.recyclerTimesSubmit.text = ("${data[position].tos}nd submit")
+            }
+            3 -> {
+                binding.recyclerTimesSubmit.text = ("${data[position].tos}rd submit")
+            }
+            4 -> {
+                binding.recyclerTimesSubmit.text = ("${data[position].tos}th submit")
+            }
+            else -> {
+                binding.recyclerTimesSubmit.text = ("${data[position].tos}th submit")
+            }
+        }
+
         holder.bind(data[position], listener!!)
     }
 
@@ -33,14 +51,14 @@ class RecyclerAdapterQrScan(val data: List<SubmissionDataClass>) :
         this.listener = listener
     }
 
-    class VH(private val v: RecyclerOldDataBinding) : RecyclerView.ViewHolder(v.root){
+    class VH(private val v: RecyclerOldDataBinding) : RecyclerView.ViewHolder(v.root) {
 
         fun bind(data: SubmissionDataClass, listener: OnItemDialogClickLister) {
             v.root.setOnClickListener { listener.onItemClick(data) }
         }
     }
 
-    interface OnItemDialogClickLister{
+    interface OnItemDialogClickLister {
         fun onItemClick(data: SubmissionDataClass)
     }
 }

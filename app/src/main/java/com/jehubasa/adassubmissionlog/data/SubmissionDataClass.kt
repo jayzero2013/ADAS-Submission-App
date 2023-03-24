@@ -5,6 +5,7 @@ import android.os.Parcelable
 
 
 data class SubmissionDataClass(
+    val id: Int?,
     val Sch: String?,//school name
     val typ: String?,//type of LR
     val ds: String?,//submission date
@@ -16,6 +17,7 @@ data class SubmissionDataClass(
     val tsd: String?//time submitted to division
 ) : Parcelable{
     constructor(parcel: Parcel) : this(
+        parcel.readValue(Int::class.java.classLoader) as? Int,
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
@@ -29,6 +31,7 @@ data class SubmissionDataClass(
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeValue(id)
         parcel.writeString(Sch)
         parcel.writeString(typ)
         parcel.writeString(ds)

@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-class QrScanFragment : Fragment() , QrScanDialogFragment.OnDialogExitListener{
+class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
 
     private lateinit var binding: FragmentQrScanBinding
     private lateinit var imageAnalysis: ImageAnalysis
@@ -42,8 +42,8 @@ class QrScanFragment : Fragment() , QrScanDialogFragment.OnDialogExitListener{
     private var qrRead: List<String> = listOf()
     private lateinit var cameraProvider: ProcessCameraProvider
     private lateinit var dataBaseHelper: QrGenDataBaseHelper
-    private var oldData: List<SubmissionDataClass> = mutableListOf()
-    private var tempLrType = ""
+    private var scannedData: SubmissionDataClass? = null
+    private var tempLrType:String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,19 +78,29 @@ class QrScanFragment : Fragment() , QrScanDialogFragment.OnDialogExitListener{
 
         binding.qrScanReopen.setOnClickListener {
             startCamera()
-            binding.formSection.visibility = View.INVISIBLE
+            resetViews()
         }
 
         binding.qrScanSave.setOnClickListener {
-
-            if (oldData.isNotEmpty()) {
+            scannedData?.let {
                 getCheckedTypeOfLr()
 
-                if ((oldData[0].tos == binding.qrScanTimesSubmitted.text.toString().toInt()) && (
-                            oldData[0].typ == tempLrType
+                if ((it.tos == binding.qrScanTimesSubmitted.text.toString().toInt()) && (
+                            it.typ == tempLrType
                             )
                 ) {
-                    Toast.makeText(requireContext(), "Update the data", Toast.LENGTH_LONG).show()
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Attention")
+                        .setMessage("Base on your Time of submission and Liquidation type, " +
+                                "I detected similar data for ${it.Sch}. By tapping 'Proceed' " +
+                                "will update the current data")
+                        .setPositiveButton("Proceed"){_,_->
+                            updateData(it.id)
+                        }
+                        .setNegativeButton("Go back"){d,_ ->
+                            d.dismiss()
+                        }
+                        .show()
                 } else {
                     saveData()
                 }
@@ -107,6 +117,10 @@ class QrScanFragment : Fragment() , QrScanDialogFragment.OnDialogExitListener{
 
         }
 
+        binding.tilQrScanSubmittedDivisionDate.setEndIconOnClickListener {
+            openCalendarPicker("Division submission date", binding.qrScanSubmittedDivisionDate)
+        }
+
         binding.qrScanSubmittedDivCheckBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 binding.tilQrScanSubmittedDivisionDate.visibility = View.VISIBLE
@@ -121,6 +135,46 @@ class QrScanFragment : Fragment() , QrScanDialogFragment.OnDialogExitListener{
             } else {
                 binding.qrScanReleasedTo.setText("")
             }
+        }
+    }
+
+    private fun resetViews() {
+        binding.formSection.visibility = View.INVISIBLE
+        binding.rgTypeOfLr.clearCheck()
+        binding.qrScanDateSubmission.setText("")
+        binding.qrScanDateRelease.setText("")
+        binding.qrScanSubmittedBy.setText("")
+        binding.qrScanReleasedTo.setText("")
+        binding.qrScanReleasedToSamePersonCheckbox.isChecked = false
+        binding.qrScanSubmittedDivCheckBox.isChecked = false
+        binding.qrScanSubmittedDivisionDate.setText("")
+        binding.qrScanTimesSubmitted.setText("")
+    }
+
+    private fun updateData(id: Int?) {
+        SubmissionDataClass(
+            null,
+            binding.qrScanSchoolName.text.toString(),
+            scannedData?.typ,
+            binding.qrScanDateSubmission.text.toString(),
+            binding.qrScanDateRelease.text.toString(),
+            binding.qrScanTimesSubmitted.text.toString().toInt(),
+            binding.qrScanSubmittedBy.text.toString(),
+            binding.qrScanReleasedTo.text.toString(),
+            chkIfsubmittedToDiv(),
+            binding.qrScanSubmittedDivisionDate.text.toString()
+        ).also {
+            dataBaseHelper.updateDataAtTable2(dataBaseHelper.writableDatabase, id, it)
+                .also { helper ->
+                    if (helper!! > 0) {
+                        Toast.makeText(requireContext(), "Update Successful", Toast.LENGTH_LONG)
+                            .show()
+                        Log.d("ASP", "Update code $helper. data: $it")
+                    } else {
+                        Toast.makeText(requireContext(), "Update failed", Toast.LENGTH_LONG).show()
+                        Log.d("ASP", "Update code $helper. data: $it")
+                    }
+                }
         }
     }
 
@@ -168,6 +222,34 @@ class QrScanFragment : Fragment() , QrScanDialogFragment.OnDialogExitListener{
                     }.show()
             }
 
+            if (fill == "Submission date" && it > (dateFormat
+                    .parse(binding.qrScanDateRelease.text.toString())?.time ?: 0)
+            ) {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Error!")
+                    .setMessage("Submission date should on or before the release date")
+                    .setPositiveButton("try again") { _, _ ->
+                        openCalendarPicker("Submission date", et)
+                    }
+                    .setNegativeButton("Decline") { _, _ ->
+                        et.setText("")
+                    }.show()
+            }
+
+            if (fill == "Division submission date" && it < (dateFormat
+                    .parse(binding.qrScanDateRelease.text.toString())?.time ?: 0)
+            ) {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Error!")
+                    .setMessage("Submission date should on or before the release date")
+                    .setPositiveButton("try again") { _, _ ->
+                        openCalendarPicker("Division submission date", et)
+                    }
+                    .setNegativeButton("Decline") { _, _ ->
+                        et.setText("")
+                    }.show()
+            }
+
             val date = dateFormat.format(Date(it))
             et.setText(date)
         }
@@ -179,6 +261,7 @@ class QrScanFragment : Fragment() , QrScanDialogFragment.OnDialogExitListener{
         val db = dataBaseHelper.readableDatabase
         val data = arrayOf(
             SubmissionDataClass(
+                null,
                 qrRead[0],
                 tempLrType,
                 binding.qrScanDateSubmission.text.toString(),
@@ -241,12 +324,12 @@ class QrScanFragment : Fragment() , QrScanDialogFragment.OnDialogExitListener{
     }
 
     private fun qrDataProcessing() {
-        oldData = dataBaseHelper.queryDataAtTable2(
+        val oldData = dataBaseHelper.queryDataAtTable2(
             dataBaseHelper.readableDatabase,
             arrayOf(qrRead[0])
         )
 
-        val bundle =Bundle().apply {
+        val bundle = Bundle().apply {
             putParcelableArrayList(
                 getString(R.string.old_data),
                 oldData as ArrayList<out Parcelable>
@@ -278,6 +361,7 @@ class QrScanFragment : Fragment() , QrScanDialogFragment.OnDialogExitListener{
     }
 
     override fun exitListener(data: SubmissionDataClass) {
+        scannedData = data
         binding.qrScanDateSubmission.setText(data.ds)
 
         val typeLR = resources.getStringArray(R.array.lr_types)
@@ -302,16 +386,17 @@ class QrScanFragment : Fragment() , QrScanDialogFragment.OnDialogExitListener{
         binding.qrScanDateRelease.setText(data.dr)
         binding.qrScanSubmittedBy.setText(data.sb)
 
-        if (data.sb == oldData[0].rt) {
+        if (data.sb == data.rt) {
             binding.qrScanReleasedToSamePersonCheckbox.isChecked = true
         }
         binding.qrScanReleasedTo.setText(data.rt)
         binding.qrScanTimesSubmitted.setText(data.tos.toString())
 
-        if(data.sd == "true"){
+        if (data.sd == "true") {
             binding.qrScanSubmittedDivCheckBox.isChecked = true
             binding.qrScanSubmittedDivisionDate.visibility = View.VISIBLE
             binding.qrScanSubmittedDivisionDate.setText(data.tsd)
         }
+
     }
 }
