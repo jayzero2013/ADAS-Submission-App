@@ -1,0 +1,46 @@
+package com.jehubasa.adassubmissionlog
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.jehubasa.adassubmissionlog.data.SubmissionDataClass
+import com.jehubasa.adassubmissionlog.databinding.RecyclerOldDataBinding
+
+class RecyclerAdapterQrScan(val data: List<SubmissionDataClass>) :
+    RecyclerView.Adapter<RecyclerAdapterQrScan.VH>() {
+
+    private lateinit var binding: RecyclerOldDataBinding
+    private var listener : OnItemDialogClickLister? =null
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+        binding = RecyclerOldDataBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return VH(binding)
+    }
+
+    override fun getItemCount(): Int {
+        return data.size
+    }
+
+    override fun onBindViewHolder(holder: VH, position: Int) {
+        binding.recyclerSchName.text = data[position].Sch
+        binding.recyclerLrType.text = data[position].typ
+        binding.recyclerTimesSubmit.text = data[position].tos.toString()
+        binding.recyclerDivStatus.text = data[position].sd
+        holder.bind(data[position], listener!!)
+    }
+
+    fun setOnItemClickListener(listener: OnItemDialogClickLister) {
+        this.listener = listener
+    }
+
+    class VH(private val v: RecyclerOldDataBinding) : RecyclerView.ViewHolder(v.root){
+
+        fun bind(data: SubmissionDataClass, listener: OnItemDialogClickLister) {
+            v.root.setOnClickListener { listener.onItemClick(data) }
+        }
+    }
+
+    interface OnItemDialogClickLister{
+        fun onItemClick(data: SubmissionDataClass)
+    }
+}

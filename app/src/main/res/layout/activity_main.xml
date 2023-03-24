@@ -31,6 +31,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
+        style="@style/Widget.App.BottomNavigationView"
         android:id="@+id/navBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

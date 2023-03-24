@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.jehubasa.adassubmissionlog.data.QrInfoDataClass
 import com.jehubasa.adassubmissionlog.data.SubmissionDataClass
+import kotlin.collections.MutableList
 
 class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
     context,
@@ -95,28 +96,30 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
         return -1
     }
 
-//    fun queryDataAtTable2(db: SQLiteDatabase?, column: Array<String>): Array<SubmissionDataClass?> {
-//        var data: Array<SubmissionDataClass?> = arrayOf()
-//        val cursor = db?.query(
-//            table1, column, null,
-//            null, null, null, null
-//        )
-//
-//        with(cursor) {
-//            while (this!!.moveToNext()) {
-//                var s = getString(getColumnIndexOrThrow(column[0]))
-//                if (data[0]?.Sch==s) {
-//                    data += SubmissionDataClass(
-//                        da
-//                    )
-//                }
-//            }
-//        }
-//
-//        cursor?.close()
-//        return data
-//
-//    }
+    fun queryDataAtTable2(db: SQLiteDatabase?, column: Array<String>): List<SubmissionDataClass> {
+        val cursor = db?.query(
+            table2, null, "$schName = ?",
+            column, null, null, null
+        )
+        val data: MutableList<SubmissionDataClass> = mutableListOf()
+
+        with(cursor) {
+            while(this!!.moveToNext()){
+                data.add(SubmissionDataClass(getString(getColumnIndexOrThrow(schName2)),
+                    getString(getColumnIndexOrThrow(lrType)),
+                    getString(getColumnIndexOrThrow(submDate)),
+                    getString(getColumnIndexOrThrow(releDate)),
+                    getInt(getColumnIndexOrThrow(timesSubm)),
+                    getString(getColumnIndexOrThrow(submBy)),
+                    getString(getColumnIndexOrThrow(releWhom)),
+                    getString(getColumnIndexOrThrow(submDiv)),
+                    getString(getColumnIndexOrThrow(whenSubmDiv))))
+            }
+        }
+
+        cursor?.close()
+        return data
+    }
 
 //    fun updateDataAtTable2(db: SQLiteDatabase?, data: Array<QrInfoDataClass>): Int? {
 //        val values = ContentValues().apply {

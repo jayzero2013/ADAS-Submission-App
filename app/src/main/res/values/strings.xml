@@ -47,6 +47,9 @@
     <string name="_3rd">3rd</string>
     <string name="_4th">4th</string>
     <string name="additional">Additional</string>
+    <string name="passed_to_division">Passed to Division:</string>
+    <string name="old_data">old_data</string>
+    <string name="just_a_decorative_image">just a decorative image</string>
 
     <string-array name="lr_types">
         <item>1st Quarter</item>

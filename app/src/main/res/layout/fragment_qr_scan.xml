@@ -10,67 +10,53 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/camera_card_view"
-            style="@style/Widget.Material3.CardView.Elevated"
+        <ImageView
+            android:id="@+id/qr_scan_reopen"
+            android:layout_width="50dp"
+            android:layout_height="0dp"
+            android:contentDescription="@string/reopen_camera_button"
+            android:elevation="4dp"
+            android:src="@drawable/baseline_refresh_24"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintTop_toTopOf="@id/preview_view"
+            app:layout_constraintStart_toStartOf="@id/preview_view"
+            app:layout_constraintEnd_toEndOf="@id/preview_view"
+            app:layout_constraintBottom_toBottomOf="@id/preview_view"/>
+
+        <ImageView
+            android:id="@+id/qr_scan_tint"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginTop="50dp"
-            app:cardCornerRadius="30dp"
-            app:cardElevation="2dp"
+            android:alpha=".5"
+            android:background="@color/design_default_color_primary"
+            android:contentDescription="@string/just_a_tint_if_the_camera_is_disabled"
+            android:elevation="2dp"
+            app:layout_constraintTop_toTopOf="@id/preview_view"
+            app:layout_constraintStart_toStartOf="@id/preview_view"
+            app:layout_constraintEnd_toEndOf="@id/preview_view"
+            app:layout_constraintBottom_toBottomOf="@id/preview_view"/>
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/preview_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="center"
+            android:rotation="0"
+            app:implementationMode="compatible"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent=".8">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/qr_scan_reopen"
-                    android:layout_width="50dp"
-                    android:layout_height="0dp"
-                    android:elevation="4dp"
-                    android:src="@drawable/baseline_refresh_24"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="1:1"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:contentDescription="@string/reopen_camera_button" />
-
-                <ImageView
-                    android:id="@+id/qr_scan_tint"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:alpha=".5"
-                    android:background="@color/design_default_color_primary"
-                    android:elevation="2dp"
-                    android:contentDescription="@string/just_a_tint_if_the_camera_is_disabled"/>
-
-                <androidx.camera.view.PreviewView
-                    android:id="@+id/preview_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:rotation="0"
-                    app:implementationMode="compatible" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <LinearLayout
             android:id="@+id/form_section"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:orientation="vertical"
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/camera_card_view">
+            app:layout_constraintTop_toBottomOf="@id/preview_view">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -101,7 +87,6 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#B9D1FB"
                 android:gravity="start"
                 android:orientation="vertical"
                 android:padding="10dp">
@@ -112,6 +97,7 @@
                     android:text="@string/type_of_liquidation_report" />
 
                 <RadioGroup
+                    android:id="@+id/rg_type_of_lr"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -205,7 +191,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="@string/released_to_same_person"/>
+                    android:text="@string/released_to_same_person" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
@@ -282,8 +268,8 @@
                             android:id="@+id/qr_scan_times_submitted"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            tools:text="1"
-                            android:inputType="number"/>
+                            android:inputType="number"
+                            tools:text="1" />
 
                     </com.google.android.material.textfield.TextInputLayout>
                 </RelativeLayout>

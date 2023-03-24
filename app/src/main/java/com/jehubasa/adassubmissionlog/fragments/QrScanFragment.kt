@@ -2,6 +2,7 @@ package com.jehubasa.adassubmissionlog.fragments
 
 import android.Manifest
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -24,13 +25,14 @@ import com.jehubasa.adassubmissionlog.QrGenDataBaseHelper
 import com.jehubasa.adassubmissionlog.R
 import com.jehubasa.adassubmissionlog.data.SubmissionDataClass
 import com.jehubasa.adassubmissionlog.databinding.FragmentQrScanBinding
+import com.jehubasa.adassubmissionlog.dialog.QrScanDialogFragment
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-class QrScanFragment : Fragment() {
+class QrScanFragment : Fragment() , QrScanDialogFragment.OnDialogExitListener{
 
     private lateinit var binding: FragmentQrScanBinding
     private lateinit var imageAnalysis: ImageAnalysis
@@ -40,6 +42,8 @@ class QrScanFragment : Fragment() {
     private var qrRead: List<String> = listOf()
     private lateinit var cameraProvider: ProcessCameraProvider
     private lateinit var dataBaseHelper: QrGenDataBaseHelper
+    private var oldData: List<SubmissionDataClass> = mutableListOf()
+    private var tempLrType = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,7 +82,19 @@ class QrScanFragment : Fragment() {
         }
 
         binding.qrScanSave.setOnClickListener {
-            saveData()
+
+            if (oldData.isNotEmpty()) {
+                getCheckedTypeOfLr()
+
+                if ((oldData[0].tos == binding.qrScanTimesSubmitted.text.toString().toInt()) && (
+                            oldData[0].typ == tempLrType
+                            )
+                ) {
+                    Toast.makeText(requireContext(), "Update the data", Toast.LENGTH_LONG).show()
+                } else {
+                    saveData()
+                }
+            }
         }
 
         binding.tilQrScanDateSubmission.setEndIconOnClickListener {
@@ -104,6 +120,26 @@ class QrScanFragment : Fragment() {
                 binding.qrScanReleasedTo.setText(binding.qrScanSubmittedBy.text.toString())
             } else {
                 binding.qrScanReleasedTo.setText("")
+            }
+        }
+    }
+
+    private fun getCheckedTypeOfLr() {
+        when (binding.rgTypeOfLr.checkedRadioButtonId) {
+            R.id.qr_scan_1q -> {
+                tempLrType = resources.getStringArray(R.array.lr_types)[0]
+            }
+            R.id.qr_scan_2q -> {
+                tempLrType = resources.getStringArray(R.array.lr_types)[1]
+            }
+            R.id.qr_scan_3q -> {
+                tempLrType = resources.getStringArray(R.array.lr_types)[2]
+            }
+            R.id.qr_scan_4q -> {
+                tempLrType = resources.getStringArray(R.array.lr_types)[3]
+            }
+            R.id.qr_scan_add -> {
+                tempLrType = resources.getStringArray(R.array.lr_types)[4]
             }
         }
     }
@@ -144,13 +180,13 @@ class QrScanFragment : Fragment() {
         val data = arrayOf(
             SubmissionDataClass(
                 qrRead[0],
-                qrRead[2],
+                tempLrType,
                 binding.qrScanDateSubmission.text.toString(),
                 binding.qrScanDateRelease.text.toString(),
                 binding.qrScanTimesSubmitted.text.toString().toInt(),
                 binding.qrScanSubmittedBy.text.toString(),
                 binding.qrScanReleasedTo.text.toString(),
-                binding.qrScanSubmittedDivCheckBox.isChecked,
+                chkIfsubmittedToDiv(),
                 binding.qrScanSubmittedDivisionDate.text.toString()
             )
         )
@@ -161,8 +197,12 @@ class QrScanFragment : Fragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    private fun chkIfsubmittedToDiv(): String {
+        if (binding.qrScanSubmittedDivCheckBox.isChecked) {
+            return "true"
+        } else {
+            return "false"
+        }
     }
 
     private fun startCamera() {
@@ -201,13 +241,47 @@ class QrScanFragment : Fragment() {
     }
 
     private fun qrDataProcessing() {
+        oldData = dataBaseHelper.queryDataAtTable2(
+            dataBaseHelper.readableDatabase,
+            arrayOf(qrRead[0])
+        )
+
+        val bundle =Bundle().apply {
+            putParcelableArrayList(
+                getString(R.string.old_data),
+                oldData as ArrayList<out Parcelable>
+            )
+        }
+
+        val dialog = QrScanDialogFragment().apply {
+            arguments = bundle
+        }
+        dialog.show(parentFragmentManager, "Showing Records")
+        dialog.setOnDialogExitListener(this)
+
         binding.formSection.visibility = View.VISIBLE
         binding.qrScanSchoolName.text = qrRead[0]
         binding.qrScanHead.text = qrRead[1]
-        binding.qrScanDateSubmission.setText(qrRead[3])
+
+    }
+
+
+    private fun stopCamera() {
+        cameraProvider.unbindAll()
+        binding.qrScanReopen.visibility = View.VISIBLE
+        binding.qrScanTint.visibility = View.VISIBLE
+        cameraExecutor.shutdown()
+    }
+
+    private fun requestCameraPermission() {
+        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+    }
+
+    override fun exitListener(data: SubmissionDataClass) {
+        binding.qrScanDateSubmission.setText(data.ds)
 
         val typeLR = resources.getStringArray(R.array.lr_types)
-        when (qrRead[2]) {
+        when (data.typ) {
             typeLR[0] -> {
                 binding.qrScan1q.isChecked = true
             }
@@ -224,17 +298,20 @@ class QrScanFragment : Fragment() {
                 binding.qrScanAdd.isChecked = true
             }
         }
-    }
 
-    private fun stopCamera() {
-        cameraProvider.unbindAll()
-        binding.qrScanReopen.visibility = View.VISIBLE
-        binding.qrScanTint.visibility = View.VISIBLE
-        cameraExecutor.shutdown()
-    }
+        binding.qrScanDateRelease.setText(data.dr)
+        binding.qrScanSubmittedBy.setText(data.sb)
 
-    private fun requestCameraPermission() {
-        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-    }
+        if (data.sb == oldData[0].rt) {
+            binding.qrScanReleasedToSamePersonCheckbox.isChecked = true
+        }
+        binding.qrScanReleasedTo.setText(data.rt)
+        binding.qrScanTimesSubmitted.setText(data.tos.toString())
 
+        if(data.sd == "true"){
+            binding.qrScanSubmittedDivCheckBox.isChecked = true
+            binding.qrScanSubmittedDivisionDate.visibility = View.VISIBLE
+            binding.qrScanSubmittedDivisionDate.setText(data.tsd)
+        }
+    }
 }
