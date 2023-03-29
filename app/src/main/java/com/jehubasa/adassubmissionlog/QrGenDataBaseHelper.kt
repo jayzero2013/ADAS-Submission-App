@@ -33,8 +33,8 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
                 "$schName TEXT, $schHead TEXT)"
 
         val createTable2 = "CREATE TABLE $table2 (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "$schName2 TEXT, $lrType TEXT, $submDate TEXT, $releDate TEXT, $timesSubm INT, " +
-                "$submBy TEXT, $releWhom TEXT, $submDiv TEXT, $whenSubmDiv TEXT)"
+                "$schName2 TEXT, $lrType TEXT, $submDate DATE, $releDate DATE, $timesSubm INT, " +
+                "$submBy TEXT, $releWhom TEXT, $submDiv TEXT, $whenSubmDiv DATE)"
         db?.execSQL(createTable)
         db?.execSQL(createTable2)
     }
@@ -56,18 +56,28 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
         return -1
     }
 
-    fun queryDataAtTable1(db: SQLiteDatabase?, column: Array<String>): Array<String?> {
-        var data: Array<String?> = arrayOf()
+    fun queryDataAtTable1(db: SQLiteDatabase?, column: Array<String>): List<String?> {
+        val data: MutableList<String?> = mutableListOf()
         val cursor = db?.query(
             table1, column, null,
             null, null, null, null
         )
 
         with(cursor) {
-            while (this!!.moveToNext()) {
-                val s = getString(getColumnIndexOrThrow(column[0]))
-                if (!data.contains(s)) {
-                    data += s
+            if (column.size == 1) {
+                while (this!!.moveToNext()) {
+                    val s = getString(getColumnIndexOrThrow(column[0]))
+                    if (!data.contains(s)) {
+                        data += s
+                    }
+                }
+            } else if (column.size == 2) {
+                while (this!!.moveToNext()) {
+                    val s = getString(getColumnIndexOrThrow(column[0]))
+                    if (!data.contains(s)) {
+                        data += s
+                        data += getString(getColumnIndexOrThrow(column[1]))
+                    }
                 }
             }
         }
@@ -125,6 +135,38 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
         cursor?.close()
         return data
     }
+
+    fun queryDateRange(db: SQLiteDatabase?, column: Array<String>): List<SubmissionDataClass> {
+
+        val query =
+            "SELECT * FROM $table2 WHERE ${column[0]} BETWEEN '${column[1]}' AND '${column[2]}'"
+
+        val cursor = db?.rawQuery(query, null)
+        val data: MutableList<SubmissionDataClass> = mutableListOf()
+
+        with(cursor) {
+            while (this!!.moveToNext()) {
+                data.add(
+                    SubmissionDataClass(
+                        getInt(getColumnIndexOrThrow("id")),
+                        getString(getColumnIndexOrThrow(schName2)),
+                        getString(getColumnIndexOrThrow(lrType)),
+                        getString(getColumnIndexOrThrow(submDate)),
+                        getString(getColumnIndexOrThrow(releDate)),
+                        getInt(getColumnIndexOrThrow(timesSubm)),
+                        getString(getColumnIndexOrThrow(submBy)),
+                        getString(getColumnIndexOrThrow(releWhom)),
+                        getString(getColumnIndexOrThrow(submDiv)),
+                        getString(getColumnIndexOrThrow(whenSubmDiv))
+                    )
+                )
+            }
+        }
+
+        cursor?.close()
+        return data
+    }
+
 
     fun updateDataAtTable2(db: SQLiteDatabase?, id: Int?, d: SubmissionDataClass?): Int? {
         val values = ContentValues().apply {

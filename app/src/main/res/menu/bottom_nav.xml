@@ -16,8 +16,8 @@
         android:icon="@drawable/baseline_check_status"
         android:title="@string/check_status" />
     <item
-        android:id="@+id/button_log_print"
-        android:icon="@drawable/baseline_print_24"
-        android:title="@string/log_print" />
+        android:id="@+id/button_about"
+        android:icon="@drawable/baseline_about"
+        android:title="@string/about" />
 
 </menu>

@@ -14,7 +14,7 @@ import com.jehubasa.adassubmissionlog.databinding.FragmentDialogScanQrBinding
 class QrScanDialogFragment : DialogFragment(), RecyclerAdapterQrScan.OnItemDialogClickLister {
 
     private lateinit var binding: FragmentDialogScanQrBinding
-    private var listener : OnDialogExitListener ?= null
+    private var listener: OnDialogExitListener? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
@@ -29,8 +29,9 @@ class QrScanDialogFragment : DialogFragment(), RecyclerAdapterQrScan.OnItemDialo
             .create()
     }
 
-    private fun runRecycler() : List<String?> {
-        val data = arguments?.getParcelableArrayList<SubmissionDataClass>(getString(R.string.old_data))
+    private fun runRecycler(): List<String?> {
+        val data =
+            arguments?.getParcelableArrayList<SubmissionDataClass>(getString(R.string.old_data))
 
         data.let {
             RecyclerAdapterQrScan(data as List<SubmissionDataClass>).also {
@@ -51,11 +52,11 @@ class QrScanDialogFragment : DialogFragment(), RecyclerAdapterQrScan.OnItemDialo
         dismiss()
     }
 
-    fun setOnDialogExitListener (l : OnDialogExitListener){
-        listener =l
+    fun setOnDialogExitListener(l: OnDialogExitListener) {
+        listener = l
     }
 
-    interface OnDialogExitListener{
-        fun exitListener(data :SubmissionDataClass)
+    interface OnDialogExitListener {
+        fun exitListener(data: SubmissionDataClass)
     }
 }

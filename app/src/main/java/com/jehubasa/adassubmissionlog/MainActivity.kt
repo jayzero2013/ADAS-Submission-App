@@ -2,18 +2,11 @@ package com.jehubasa.adassubmissionlog
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
-import android.widget.AdapterView.OnItemSelectedListener
-import android.widget.Toast
 import androidx.fragment.app.commit
-import com.google.android.material.bottomnavigation.BottomNavigationItemView
-import com.google.android.material.bottomnavigation.BottomNavigationMenuView
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.navigation.NavigationBarView
 import com.jehubasa.adassubmissionlog.databinding.ActivityMainBinding
 import com.jehubasa.adassubmissionlog.fragments.CheckStatusFragment
-import com.jehubasa.adassubmissionlog.fragments.LogPrintingFragment
+import com.jehubasa.adassubmissionlog.fragments.AboutFragment
 import com.jehubasa.adassubmissionlog.fragments.QrGenFragment
 import com.jehubasa.adassubmissionlog.fragments.QrScanFragment
 
@@ -57,14 +50,14 @@ class MainActivity : AppCompatActivity(),
 
         R.id.button_check_status -> {
             supportFragmentManager.commit {
-                replace(R.id.navFragmentContainer, LogPrintingFragment())
+                replace(R.id.navFragmentContainer, CheckStatusFragment())
             }
             true
         }
 
-        R.id.button_log_print -> {
+        R.id.button_about -> {
             supportFragmentManager.commit {
-                replace(R.id.navFragmentContainer, CheckStatusFragment())
+                replace(R.id.navFragmentContainer, AboutFragment())
             }
             true
         }

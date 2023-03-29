@@ -150,13 +150,13 @@ class QrGenFragment : Fragment() {
 
         schRecentData?.let {
             (binding.qrGenSchoolName as? MaterialAutoCompleteTextView)?.setSimpleItems(
-                it
+                it.toTypedArray()
             )
         }
 
         schHeadRecentData?.let {
             (binding.qrGenSchoolHead as? MaterialAutoCompleteTextView)?.setSimpleItems(
-                it
+                it.toTypedArray()
             )
         }
 

@@ -3,6 +3,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/qr_scan_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -17,24 +18,24 @@
             android:contentDescription="@string/reopen_camera_button"
             android:elevation="4dp"
             android:src="@drawable/baseline_refresh_24"
+            app:layout_constraintBottom_toBottomOf="@id/preview_view"
             app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintTop_toTopOf="@id/preview_view"
-            app:layout_constraintStart_toStartOf="@id/preview_view"
             app:layout_constraintEnd_toEndOf="@id/preview_view"
-            app:layout_constraintBottom_toBottomOf="@id/preview_view"/>
+            app:layout_constraintStart_toStartOf="@id/preview_view"
+            app:layout_constraintTop_toTopOf="@id/preview_view" />
 
         <ImageView
             android:id="@+id/qr_scan_tint"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:alpha=".5"
-            android:background="@color/design_default_color_primary"
+            android:background="@color/colorPrimary"
             android:contentDescription="@string/just_a_tint_if_the_camera_is_disabled"
             android:elevation="2dp"
-            app:layout_constraintTop_toTopOf="@id/preview_view"
-            app:layout_constraintStart_toStartOf="@id/preview_view"
+            app:layout_constraintBottom_toBottomOf="@id/preview_view"
             app:layout_constraintEnd_toEndOf="@id/preview_view"
-            app:layout_constraintBottom_toBottomOf="@id/preview_view"/>
+            app:layout_constraintStart_toStartOf="@id/preview_view"
+            app:layout_constraintTop_toTopOf="@id/preview_view" />
 
         <androidx.camera.view.PreviewView
             android:id="@+id/preview_view"
@@ -46,7 +47,7 @@
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/form_section"
@@ -61,7 +62,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/design_default_color_primary"
+                android:background="@color/colorPrimary"
                 android:orientation="vertical"
                 android:padding="10dp">
 
@@ -133,43 +134,87 @@
                         android:text="@string/additional" />
                 </RadioGroup>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_qr_scan_date_submission"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_qr_scan_date_submission"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.5"
+                        android:hint="@string/date_of_submission"
+                        app:endIconContentDescription="@string/calendar_picker_desc"
+                        app:endIconDrawable="@drawable/baseline_calendar_month_24"
+                        app:endIconMode="custom">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/qr_scan_date_submission"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="false"
+                            tools:text="03/23/2023" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <ImageButton
+                        android:id="@+id/qr_scan_clear_submission"
+                        android:layout_width="50dp"
+                        android:layout_height="37dp"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight=".5"
+                        android:adjustViewBounds="true"
+                        android:background="@drawable/circle"
+                        android:src="@drawable/baseline_clear_24"
+                        />
+
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:hint="@string/date_of_submission"
-                    app:endIconContentDescription="@string/calendar_picker_desc"
-                    app:endIconDrawable="@drawable/baseline_calendar_month_24"
-                    app:endIconMode="custom">
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/qr_scan_date_submission"
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_qr_scan_date_release"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:enabled="false"
-                        tools:text="03/23/2023" />
+                        android:layout_weight="1.5"
+                        android:hint="@string/date_of_release"
+                        app:endIconContentDescription="@string/calendar_picker_desc"
+                        app:endIconDrawable="@drawable/baseline_calendar_month_24"
+                        app:endIconMode="custom">
 
-                </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/qr_scan_date_release"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="false"
+                            tools:text="03/23/2023" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_qr_scan_date_release"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:hint="@string/date_of_release"
-                    app:endIconContentDescription="@string/calendar_picker_desc"
-                    app:endIconDrawable="@drawable/baseline_calendar_month_24"
-                    app:endIconMode="custom">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/qr_scan_date_release"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        tools:text="03/23/2023" />
+                    <ImageButton
+                        android:id="@+id/qr_scan_clear_release"
+                        android:layout_width="50dp"
+                        android:layout_height="37dp"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight=".5"
+                        android:adjustViewBounds="true"
+                        android:background="@drawable/circle"
+                        android:src="@drawable/baseline_clear_24"
+                        />
 
-                </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"

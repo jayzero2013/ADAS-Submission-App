@@ -1,12 +1,14 @@
 package com.jehubasa.adassubmissionlog.fragments
 
 import android.Manifest
+import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,7 +45,8 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     private lateinit var cameraProvider: ProcessCameraProvider
     private lateinit var dataBaseHelper: QrGenDataBaseHelper
     private var scannedData: SubmissionDataClass? = null
-    private var tempLrType:String = ""
+    private var tempLrType: String = ""
+    private var oldData: List<SubmissionDataClass> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,27 +85,42 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
         }
 
         binding.qrScanSave.setOnClickListener {
+            checkOldData()
+            if (oldData.isEmpty()) {
+                saveData()
+            }
             scannedData?.let {
-                getCheckedTypeOfLr()
 
-                if ((it.tos == binding.qrScanTimesSubmitted.text.toString().toInt()) && (
-                            it.typ == tempLrType
+                if (isDataIsFilled()) {
+
+                    getCheckedTypeOfLr()
+
+                    if ((it.tos == binding.qrScanTimesSubmitted.text.toString().toInt()) && (
+                                it.typ == tempLrType
+                                )
+                    ) {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("Attention")
+                            .setMessage(
+                                "Base on your Time of submission and Liquidation type, " +
+                                        "I detected similar data for ${it.Sch}. By tapping 'Proceed' " +
+                                        "will update the current data"
                             )
-                ) {
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle("Attention")
-                        .setMessage("Base on your Time of submission and Liquidation type, " +
-                                "I detected similar data for ${it.Sch}. By tapping 'Proceed' " +
-                                "will update the current data")
-                        .setPositiveButton("Proceed"){_,_->
-                            updateData(it.id)
-                        }
-                        .setNegativeButton("Go back"){d,_ ->
-                            d.dismiss()
-                        }
-                        .show()
+                            .setPositiveButton("Proceed") { _, _ ->
+                                updateData(it.id)
+                            }
+                            .setNegativeButton("Go back") { d, _ ->
+                                d.dismiss()
+                            }
+                            .show()
+                    } else {
+                        saveData()
+                    }
                 } else {
-                    saveData()
+                    Toast.makeText(
+                        requireContext(), "Please fill up required fields.",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
         }
@@ -136,6 +154,32 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
                 binding.qrScanReleasedTo.setText("")
             }
         }
+
+        binding.rgTypeOfLr.setOnCheckedChangeListener { _, _ ->
+            binding.qrScanDateSubmission.setText("")
+            binding.qrScanDateRelease.setText("")
+            binding.qrScanSubmittedBy.setText("")
+            binding.qrScanReleasedTo.setText("")
+            binding.qrScanReleasedToSamePersonCheckbox.isChecked = false
+            binding.qrScanSubmittedDivCheckBox.isChecked = false
+            binding.qrScanSubmittedDivisionDate.setText("")
+            binding.qrScanTimesSubmitted.setText("")
+        }
+
+        binding.qrScanClearSubmission.setOnClickListener {
+            binding.qrScanDateSubmission.setText("")
+        }
+
+        binding.qrScanClearRelease.setOnClickListener {
+            binding.qrScanDateRelease.setText("")
+        }
+    }
+
+    private fun isDataIsFilled(): Boolean {
+        return binding.rgTypeOfLr.checkedRadioButtonId > -1 &&
+                !binding.qrScanDateSubmission.text.isNullOrEmpty() &&
+                !binding.qrScanSubmittedBy.text.isNullOrEmpty() &&
+                !binding.qrScanTimesSubmitted.text.isNullOrEmpty()
     }
 
     private fun resetViews() {
@@ -149,6 +193,13 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
         binding.qrScanSubmittedDivCheckBox.isChecked = false
         binding.qrScanSubmittedDivisionDate.setText("")
         binding.qrScanTimesSubmitted.setText("")
+
+        //hide the keyboard after pressing the generate button
+        val inputMethodManager =
+            requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(binding.qrScanSave.windowToken, 0)
+
+        binding.qrScanScrollView.scrollY = binding.qrScanScrollView.scrollY - 1500
     }
 
     private fun updateData(id: Int?) {
@@ -167,6 +218,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
             dataBaseHelper.updateDataAtTable2(dataBaseHelper.writableDatabase, id, it)
                 .also { helper ->
                     if (helper!! > 0) {
+                        resetViews()
                         Toast.makeText(requireContext(), "Update Successful", Toast.LENGTH_LONG)
                             .show()
                         Log.d("ASP", "Update code $helper. data: $it")
@@ -208,46 +260,53 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
         datePicker.addOnPositiveButtonClickListener {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-            if (fill == "Released date" && it < (dateFormat
-                    .parse(binding.qrScanDateSubmission.text.toString())?.time ?: 0)
-            ) {
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Error!")
-                    .setMessage("Released date should on or after the submission date")
-                    .setPositiveButton("try again") { _, _ ->
-                        openCalendarPicker("Released date", et)
-                    }
-                    .setNegativeButton("Decline") { _, _ ->
-                        et.setText("")
-                    }.show()
+
+            if (!binding.qrScanDateSubmission.text.isNullOrEmpty()) {
+                if (fill == "Released date" && it < (dateFormat
+                        .parse(binding.qrScanDateSubmission.text.toString())?.time ?: 0)
+                ) {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Error!")
+                        .setMessage("Released date should on or after the submission date")
+                        .setPositiveButton("try again") { _, _ ->
+                            openCalendarPicker("Released date", et)
+                        }
+                        .setNegativeButton("Decline") { _, _ ->
+                            et.setText("")
+                        }.show()
+                }
             }
 
-            if (fill == "Submission date" && it > (dateFormat
-                    .parse(binding.qrScanDateRelease.text.toString())?.time ?: 0)
-            ) {
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Error!")
-                    .setMessage("Submission date should on or before the release date")
-                    .setPositiveButton("try again") { _, _ ->
-                        openCalendarPicker("Submission date", et)
-                    }
-                    .setNegativeButton("Decline") { _, _ ->
-                        et.setText("")
-                    }.show()
+            if (!binding.qrScanDateRelease.text.isNullOrEmpty()) {
+                if (fill == "Submission date" && it > (dateFormat
+                        .parse(binding.qrScanDateRelease.text.toString())?.time ?: 0)
+                ) {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Error!")
+                        .setMessage("Submission date should on or before the release date")
+                        .setPositiveButton("try again") { _, _ ->
+                            openCalendarPicker("Submission date", et)
+                        }
+                        .setNegativeButton("Decline") { _, _ ->
+                            et.setText("")
+                        }.show()
+                }
             }
 
-            if (fill == "Division submission date" && it < (dateFormat
-                    .parse(binding.qrScanDateRelease.text.toString())?.time ?: 0)
-            ) {
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Error!")
-                    .setMessage("Submission date should on or before the release date")
-                    .setPositiveButton("try again") { _, _ ->
-                        openCalendarPicker("Division submission date", et)
-                    }
-                    .setNegativeButton("Decline") { _, _ ->
-                        et.setText("")
-                    }.show()
+            if (!binding.qrScanDateRelease.text.isNullOrEmpty()) {
+                if (fill == "Division submission date" && it < (dateFormat
+                        .parse(binding.qrScanDateRelease.text.toString())?.time ?: 0)
+                ) {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Error!")
+                        .setMessage("Submission date should on or before the release date")
+                        .setPositiveButton("try again") { _, _ ->
+                            openCalendarPicker("Division submission date", et)
+                        }
+                        .setNegativeButton("Decline") { _, _ ->
+                            et.setText("")
+                        }.show()
+                }
             }
 
             val date = dateFormat.format(Date(it))
@@ -257,7 +316,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     }
 
     private fun saveData() {
-
+        getCheckedTypeOfLr()
         val db = dataBaseHelper.readableDatabase
         val data = arrayOf(
             SubmissionDataClass(
@@ -274,6 +333,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
             )
         )
         if (dataBaseHelper.insertDateAtTable2(db, data) >= 0) {
+            resetViews()
             Toast.makeText(requireContext(), "saved", Toast.LENGTH_LONG).show()
         } else {
             Log.e("ASP", "error on saving from scan page")
@@ -324,28 +384,58 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     }
 
     private fun qrDataProcessing() {
-        val oldData = dataBaseHelper.queryDataAtTable2(
+        checkOldData()
+
+        binding.formSection.visibility = View.VISIBLE
+        if (oldData.isNotEmpty()) {
+            val bundle = Bundle().apply {
+                putParcelableArrayList(
+                    getString(R.string.old_data),
+                    oldData as ArrayList<out Parcelable>
+                )
+            }
+
+            val dialog = QrScanDialogFragment().apply {
+                arguments = bundle
+            }
+            dialog.isCancelable = false
+            dialog.show(parentFragmentManager, "Showing Records")
+            dialog.setOnDialogExitListener(this)
+        } else {
+            binding.qrScanSchoolName.text = qrRead[0]
+            binding.qrScanHead.text = qrRead[1]
+
+            if (qrRead.size > 3) {
+                binding.qrScanDateSubmission.setText(qrRead[3])
+            }
+
+            val typeLR = resources.getStringArray(R.array.lr_types)
+            when (qrRead[2]) {
+                typeLR[0] -> {
+                    binding.qrScan1q.isChecked = true
+                }
+                typeLR[1] -> {
+                    binding.qrScan2q.isChecked = true
+                }
+                typeLR[2] -> {
+                    binding.qrScan3q.isChecked = true
+                }
+                typeLR[3] -> {
+                    binding.qrScan4q.isChecked = true
+                }
+                typeLR[4] -> {
+                    binding.qrScanAdd.isChecked = true
+                }
+            }
+        }
+
+    }
+
+    private fun checkOldData() {
+        oldData = dataBaseHelper.queryDataAtTable2(
             dataBaseHelper.readableDatabase,
             arrayOf(qrRead[0])
         )
-
-        val bundle = Bundle().apply {
-            putParcelableArrayList(
-                getString(R.string.old_data),
-                oldData as ArrayList<out Parcelable>
-            )
-        }
-
-        val dialog = QrScanDialogFragment().apply {
-            arguments = bundle
-        }
-        dialog.show(parentFragmentManager, "Showing Records")
-        dialog.setOnDialogExitListener(this)
-
-        binding.formSection.visibility = View.VISIBLE
-        binding.qrScanSchoolName.text = qrRead[0]
-        binding.qrScanHead.text = qrRead[1]
-
     }
 
 
@@ -362,8 +452,8 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
 
     override fun exitListener(data: SubmissionDataClass) {
         scannedData = data
-        binding.qrScanDateSubmission.setText(data.ds)
-
+        binding.qrScanSchoolName.text = data.Sch
+        binding.qrScanHead.text = checkHead(data.Sch!!)
         val typeLR = resources.getStringArray(R.array.lr_types)
         when (data.typ) {
             typeLR[0] -> {
@@ -383,6 +473,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
             }
         }
 
+        binding.qrScanDateSubmission.setText(data.ds)
         binding.qrScanDateRelease.setText(data.dr)
         binding.qrScanSubmittedBy.setText(data.sb)
 
@@ -398,5 +489,19 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
             binding.qrScanSubmittedDivisionDate.setText(data.tsd)
         }
 
+    }
+
+    private fun checkHead(sch: String): String? {
+        dataBaseHelper.queryDataAtTable1(
+            dataBaseHelper.readableDatabase,
+            arrayOf(getString(R.string.sch_name), getString(R.string.sch_head))
+        ).also {
+            if (it?.size!! > 0) {
+                if (it.contains(sch)) {
+                    return it[it.indexOf(sch) + 1]
+                }
+            }
+        }
+        return null
     }
 }

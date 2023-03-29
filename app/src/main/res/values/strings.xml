@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">ADAS Submission Log</string>
-    <string name="qr_scanner">qr_scanner</string>
+    <string name="qr_scanner">QR scanner</string>
     <string name="qr_generator">QR generator</string>
-    <string name="check_status">check_status</string>
-    <string name="log_print">log_print</string>
+    <string name="check_status">Logs</string>
+    <string name="about">About</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="school_name">School Name</string>
@@ -30,12 +30,12 @@
     <string name="whenSubmDiv">whenSubmDiv</string>
     <string name="save">save</string>
     <string name="released_to">Released to</string>
-    <string name="submitted_by">Submitted by</string>
+    <string name="submitted_by">Submitted by(required)</string>
     <string name="date_of_release">Date of release</string>
-    <string name="date_of_submission">Date of submission</string>
+    <string name="date_of_submission">Date of submission(required)</string>
     <string name="type_of_lr">Type of LR</string>
-    <string name="type_of_liquidation_report">Type of liquidation report:</string>
-    <string name="times_submitted">Times submitted</string>
+    <string name="type_of_liquidation_report">Type of liquidation report(required):</string>
+    <string name="times_submitted">Times submitted(required)</string>
     <string name="submitted_to_division">Submitted to division</string>
     <string name="division_submission_date">Division submission date</string>
     <string name="calendar_picker_desc">when click calendar picker will open.</string>
@@ -50,6 +50,14 @@
     <string name="passed_to_division">Passed to Division:</string>
     <string name="old_data">old_data</string>
     <string name="just_a_decorative_image">just a decorative image</string>
+    <string name="submission_logs">Submission Logs</string>
+    <string name="submission_date">Submission date:</string>
+    <string name="released_date">Released date:</string>
+    <string name="division_submission_date_label">Division submission date:</string>
+    <string name="submitted_by_label">Submitted by:</string>
+    <string name="released_to_label">Released to:</string>
+    <string name="no_of_items_label">No. of items:</string>
+    <string name="filter">Filter</string>
 
     <string-array name="lr_types">
         <item>1st Quarter</item>
@@ -58,4 +66,5 @@
         <item>4th Quarter</item>
         <item>Additions</item>
     </string-array>
+
 </resources>
