@@ -58,6 +58,8 @@
     <string name="released_to_label">Released to:</string>
     <string name="no_of_items_label">No. of items:</string>
     <string name="filter">Filter</string>
+    <string name="print">Print</string>
+    <string name="button_for_saving_the_table_to_pdf_SD">Button for saving the table to PDF</string>
 
     <string-array name="lr_types">
         <item>1st Quarter</item>

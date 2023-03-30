@@ -1,12 +1,12 @@
 package com.jehubasa.adassubmissionlog
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import com.jehubasa.adassubmissionlog.databinding.ActivityMainBinding
-import com.jehubasa.adassubmissionlog.fragments.CheckStatusFragment
 import com.jehubasa.adassubmissionlog.fragments.AboutFragment
+import com.jehubasa.adassubmissionlog.fragments.CheckStatusFragment
 import com.jehubasa.adassubmissionlog.fragments.QrGenFragment
 import com.jehubasa.adassubmissionlog.fragments.QrScanFragment
 

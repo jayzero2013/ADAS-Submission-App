@@ -135,10 +135,11 @@ class QrGenFragment : Fragment() {
             "com.jehubasa.adassubmissionlog" + ".provider",
             file
         )
-        val shareIntent = Intent(Intent.ACTION_SEND)
-        shareIntent.type = "image/*"
-        shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
-        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        val shareIntent = Intent(Intent.ACTION_SEND).apply{
+            type = "image/*"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
         context?.startActivity(Intent.createChooser(shareIntent, "Share Image"))
 
     }
