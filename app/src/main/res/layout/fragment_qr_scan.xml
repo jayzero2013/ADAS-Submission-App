@@ -18,6 +18,7 @@
             android:contentDescription="@string/reopen_camera_button"
             android:elevation="4dp"
             android:src="@drawable/baseline_refresh_24"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/preview_view"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="@id/preview_view"
@@ -49,12 +50,34 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/preview_view">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/qr_scan_open_camera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/open_camera"
+                android:enabled="false"
+                app:icon="@drawable/baseline_camera_alt_24" />
+
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/form_section"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/preview_view">
@@ -169,7 +192,7 @@
                         android:adjustViewBounds="true"
                         android:background="@drawable/circle"
                         android:src="@drawable/baseline_clear_24"
-                        />
+                        android:contentDescription="@string/clear_field"/>
 
 
                 </LinearLayout>
@@ -211,7 +234,7 @@
                         android:adjustViewBounds="true"
                         android:background="@drawable/circle"
                         android:src="@drawable/baseline_clear_24"
-                        />
+                        android:contentDescription="@string/clear_field"/>
 
                 </LinearLayout>
 
@@ -280,6 +303,7 @@
                             android:id="@+id/qr_scan_submitted_division_date"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:enabled="false"
                             tools:text="1" />
 
                     </com.google.android.material.textfield.TextInputLayout>

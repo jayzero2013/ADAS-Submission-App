@@ -4,7 +4,9 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.pdf.PdfDocument
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.TableRow
 import android.widget.TextView
 import android.widget.Toast
@@ -12,6 +14,7 @@ import androidx.core.content.FileProvider
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.transition.MaterialFadeThrough
 import com.jehubasa.adassubmissionlog.QrGenDataBaseHelper
 import com.jehubasa.adassubmissionlog.R
 import com.jehubasa.adassubmissionlog.data.SubmissionDataClass
@@ -26,6 +29,13 @@ class CheckStatusFragment : Fragment() {
     private lateinit var binding: FragmentCheckStatusBinding
     private lateinit var dataBaseHelper: QrGenDataBaseHelper
     private var data: List<SubmissionDataClass> = listOf()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        exitTransition = MaterialFadeThrough()
+        enterTransition = MaterialFadeThrough()
+
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

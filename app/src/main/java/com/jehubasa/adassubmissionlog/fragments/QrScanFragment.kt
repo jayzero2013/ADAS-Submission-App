@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.transition.MaterialFadeThrough
 import com.jehubasa.adassubmissionlog.QRCodeAnalyzer
 import com.jehubasa.adassubmissionlog.QrGenDataBaseHelper
 import com.jehubasa.adassubmissionlog.R
@@ -51,12 +52,14 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        exitTransition = MaterialFadeThrough()
+        enterTransition = MaterialFadeThrough()
 
         cameraPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
                 if (isGranted) {
                     // Permission granted, start the camera
-                    startCamera()
+                    binding.qrScanOpenCamera.isEnabled = true
                 } else {
                     // Permission denied, show a message to the user
                     Toast.makeText(requireContext(), "Camera permission denied", Toast.LENGTH_SHORT)
@@ -86,8 +89,13 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
 
         binding.qrScanSave.setOnClickListener {
             checkOldData()
-            if (oldData.isEmpty()) {
+            if (oldData.isEmpty() && isDataIsFilled()) {
                 saveData()
+            } else {
+                Toast.makeText(
+                    requireContext(), "Please fill up required fields.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
             scannedData?.let {
 
@@ -142,6 +150,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
         binding.qrScanSubmittedDivCheckBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 binding.tilQrScanSubmittedDivisionDate.visibility = View.VISIBLE
+                binding.qrScanSubmittedDivisionDate.setText("")
             } else {
                 binding.tilQrScanSubmittedDivisionDate.visibility = View.INVISIBLE
             }
@@ -173,13 +182,31 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
         binding.qrScanClearRelease.setOnClickListener {
             binding.qrScanDateRelease.setText("")
         }
+
+        binding.qrScanOpenCamera.setOnClickListener {
+            startCamera()
+            binding.qrScanOpenCamera.visibility =View.GONE
+        }
     }
 
     private fun isDataIsFilled(): Boolean {
-        return binding.rgTypeOfLr.checkedRadioButtonId > -1 &&
+
+        if(binding.qrScanSubmittedDivCheckBox.isChecked){
+            if(binding.rgTypeOfLr.checkedRadioButtonId > -1 &&
                 !binding.qrScanDateSubmission.text.isNullOrEmpty() &&
                 !binding.qrScanSubmittedBy.text.isNullOrEmpty() &&
-                !binding.qrScanTimesSubmitted.text.isNullOrEmpty()
+                !binding.qrScanTimesSubmitted.text.isNullOrEmpty()&&
+                !binding.qrScanSubmittedDivisionDate.text.isNullOrEmpty()){
+                return true
+            }
+        } else if (binding.rgTypeOfLr.checkedRadioButtonId > -1 &&
+            !binding.qrScanDateSubmission.text.isNullOrEmpty() &&
+            !binding.qrScanSubmittedBy.text.isNullOrEmpty() &&
+            !binding.qrScanTimesSubmitted.text.isNullOrEmpty()) {
+            return true
+        }
+
+        return false
     }
 
     private fun resetViews() {

@@ -3,7 +3,7 @@
     <string name="qr_scanner">QR scanner</string>
     <string name="qr_generator">QR generator</string>
     <string name="check_status">Logs</string>
-    <string name="about">About</string>
+    <string name="about">This App was made for Stephannie M. Basa \n JehuAndroidApps © 2023</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="school_name">School Name</string>
@@ -60,6 +60,11 @@
     <string name="filter">Filter</string>
     <string name="print">Print</string>
     <string name="button_for_saving_the_table_to_pdf_SD">Button for saving the table to PDF</string>
+    <string name="about_bottom_nav">About</string>
+    <string name="just_a_logo">Just a logo</string>
+    <string name="about_desc">Department of Education \n Administrative Assistant Log App</string>
+    <string name="open_camera">Open camera</string>
+    <string name="clear_field">clear_field</string>
 
     <string-array name="lr_types">
         <item>1st Quarter</item>
