@@ -22,7 +22,8 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.transition.MaterialFadeThrough
+import com.google.android.material.transition.MaterialSharedAxis
+import com.jehubasa.adassubmissionlog.FirebaseDatabase
 import com.jehubasa.adassubmissionlog.QRCodeAnalyzer
 import com.jehubasa.adassubmissionlog.QrGenDataBaseHelper
 import com.jehubasa.adassubmissionlog.R
@@ -48,12 +49,15 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     private var scannedData: SubmissionDataClass? = null
     private var tempLrType: String = ""
     private var oldData: List<SubmissionDataClass> = listOf()
+    private var isQrdataprocessingLoaded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        exitTransition = MaterialFadeThrough()
-        enterTransition = MaterialFadeThrough()
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
 
         cameraPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -91,12 +95,8 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
             checkOldData()
             if (oldData.isEmpty() && isDataIsFilled()) {
                 saveData()
-            } else {
-                Toast.makeText(
-                    requireContext(), "Please fill up required fields.",
-                    Toast.LENGTH_LONG
-                ).show()
             }
+
             scannedData?.let {
 
                 if (isDataIsFilled()) {
@@ -111,7 +111,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
                             .setTitle("Attention")
                             .setMessage(
                                 "Base on your Time of submission and Liquidation type, " +
-                                        "I detected similar data for ${it.Sch}. By tapping 'Proceed' " +
+                                        "I detected similar data for ${it.sch}. By tapping 'Proceed' " +
                                         "will update the current data"
                             )
                             .setPositiveButton("Proceed") { _, _ ->
@@ -185,27 +185,33 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
 
         binding.qrScanOpenCamera.setOnClickListener {
             startCamera()
-            binding.qrScanOpenCamera.visibility =View.GONE
+            binding.qrScanOpenCamera.visibility = View.GONE
         }
     }
 
     private fun isDataIsFilled(): Boolean {
 
-        if(binding.qrScanSubmittedDivCheckBox.isChecked){
-            if(binding.rgTypeOfLr.checkedRadioButtonId > -1 &&
+        if (binding.qrScanSubmittedDivCheckBox.isChecked) {
+            if (binding.rgTypeOfLr.checkedRadioButtonId > -1 &&
                 !binding.qrScanDateSubmission.text.isNullOrEmpty() &&
                 !binding.qrScanSubmittedBy.text.isNullOrEmpty() &&
-                !binding.qrScanTimesSubmitted.text.isNullOrEmpty()&&
-                !binding.qrScanSubmittedDivisionDate.text.isNullOrEmpty()){
+                !binding.qrScanTimesSubmitted.text.isNullOrEmpty() &&
+                !binding.qrScanSubmittedDivisionDate.text.isNullOrEmpty()
+            ) {
                 return true
             }
         } else if (binding.rgTypeOfLr.checkedRadioButtonId > -1 &&
             !binding.qrScanDateSubmission.text.isNullOrEmpty() &&
             !binding.qrScanSubmittedBy.text.isNullOrEmpty() &&
-            !binding.qrScanTimesSubmitted.text.isNullOrEmpty()) {
+            !binding.qrScanTimesSubmitted.text.isNullOrEmpty()
+        ) {
             return true
         }
 
+        Toast.makeText(
+            requireContext(), "Please fill up required fields.",
+            Toast.LENGTH_LONG
+        ).show()
         return false
     }
 
@@ -220,7 +226,8 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
         binding.qrScanSubmittedDivCheckBox.isChecked = false
         binding.qrScanSubmittedDivisionDate.setText("")
         binding.qrScanTimesSubmitted.setText("")
-
+        isQrdataprocessingLoaded = false
+        scannedData = null
         //hide the keyboard after pressing the generate button
         val inputMethodManager =
             requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -229,31 +236,32 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
         binding.qrScanScrollView.scrollY = binding.qrScanScrollView.scrollY - 1500
     }
 
-    private fun updateData(id: Int?) {
-        SubmissionDataClass(
-            null,
-            binding.qrScanSchoolName.text.toString(),
-            scannedData?.typ,
-            binding.qrScanDateSubmission.text.toString(),
-            binding.qrScanDateRelease.text.toString(),
-            binding.qrScanTimesSubmitted.text.toString().toInt(),
-            binding.qrScanSubmittedBy.text.toString(),
-            binding.qrScanReleasedTo.text.toString(),
-            chkIfsubmittedToDiv(),
-            binding.qrScanSubmittedDivisionDate.text.toString()
-        ).also {
-            dataBaseHelper.updateDataAtTable2(dataBaseHelper.writableDatabase, id, it)
-                .also { helper ->
-                    if (helper!! > 0) {
-                        resetViews()
-                        Toast.makeText(requireContext(), "Update Successful", Toast.LENGTH_LONG)
-                            .show()
-                        Log.d("ASP", "Update code $helper. data: $it")
-                    } else {
-                        Toast.makeText(requireContext(), "Update failed", Toast.LENGTH_LONG).show()
-                        Log.d("ASP", "Update code $helper. data: $it")
-                    }
-                }
+    private fun updateData(id: String?) {
+
+        val dbref = com.google.firebase.database.FirebaseDatabase.getInstance()
+            .getReference(getString(R.string.firebase_liquidationLog_ref))
+
+        FirebaseDatabase().updateDataSubmission(
+            dbref, getString(R.string.firebase_liquidationLog_ref), id!!,
+            SubmissionDataClass(
+                id,
+                binding.qrScanSchoolName.text.toString(),
+                scannedData?.typ,
+                binding.qrScanDateSubmission.text.toString(),
+                binding.qrScanDateRelease.text.toString(),
+                binding.qrScanTimesSubmitted.text.toString().toInt(),
+                binding.qrScanSubmittedBy.text.toString(),
+                binding.qrScanReleasedTo.text.toString(),
+                chkIfSubmittedToDiv(),
+                binding.qrScanSubmittedDivisionDate.text.toString()
+            )
+        ) {
+            if (it) {
+                Toast.makeText(requireContext(), "Updated successfully", Toast.LENGTH_LONG).show()
+                resetViews()
+            } else {
+                Toast.makeText(requireContext(), "Update failed", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -343,11 +351,15 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     }
 
     private fun saveData() {
-        getCheckedTypeOfLr()
-        val db = dataBaseHelper.readableDatabase
-        val data = arrayOf(
+
+        val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance()
+            .getReference(getString(R.string.firebase_liquidationLog_ref))
+
+        val id = dbRef.push().key!!
+        FirebaseDatabase().initLiquidationDatabase(
+            dbRef,
             SubmissionDataClass(
-                null,
+                id,
                 qrRead[0],
                 tempLrType,
                 binding.qrScanDateSubmission.text.toString(),
@@ -355,19 +367,20 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
                 binding.qrScanTimesSubmitted.text.toString().toInt(),
                 binding.qrScanSubmittedBy.text.toString(),
                 binding.qrScanReleasedTo.text.toString(),
-                chkIfsubmittedToDiv(),
+                chkIfSubmittedToDiv(),
                 binding.qrScanSubmittedDivisionDate.text.toString()
             )
-        )
-        if (dataBaseHelper.insertDateAtTable2(db, data) >= 0) {
-            resetViews()
-            Toast.makeText(requireContext(), "saved", Toast.LENGTH_LONG).show()
-        } else {
-            Log.e("ASP", "error on saving from scan page")
+        ) {
+            if (it) {
+                Toast.makeText(requireContext(), "Saved successfully", Toast.LENGTH_LONG).show()
+                resetViews()
+            } else {
+                Toast.makeText(requireContext(), "Saving failed", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
-    private fun chkIfsubmittedToDiv(): String {
+    private fun chkIfSubmittedToDiv(): String {
         if (binding.qrScanSubmittedDivCheckBox.isChecked) {
             return "true"
         } else {
@@ -385,8 +398,9 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
                     // QR code scanned successfully, do something with the result
                     qrRead = qrCode[0].split("/")
                     Log.d("ASP", qrRead.toString())
+                    binding.qrScanProgress.visibility = View.VISIBLE
                     stopCamera()
-                    qrDataProcessing()
+                    checkOldData()
                 })
             }
 
@@ -411,7 +425,6 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     }
 
     private fun qrDataProcessing() {
-        checkOldData()
 
         binding.formSection.visibility = View.VISIBLE
         if (oldData.isNotEmpty()) {
@@ -432,10 +445,6 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
             binding.qrScanSchoolName.text = qrRead[0]
             binding.qrScanHead.text = qrRead[1]
 
-            if (qrRead.size > 3) {
-                binding.qrScanDateSubmission.setText(qrRead[3])
-            }
-
             val typeLR = resources.getStringArray(R.array.lr_types)
             when (qrRead[2]) {
                 typeLR[0] -> {
@@ -454,17 +463,26 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
                     binding.qrScanAdd.isChecked = true
                 }
             }
+            tempLrType = qrRead[2]
+            if (qrRead.size > 3) {
+                binding.qrScanDateSubmission.setText(qrRead[3])
+            }
         }
-
+        isQrdataprocessingLoaded = true
     }
 
     private fun checkOldData() {
-        oldData = dataBaseHelper.queryDataAtTable2(
-            dataBaseHelper.readableDatabase,
-            arrayOf(qrRead[0])
-        )
-    }
+        val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance()
+            .getReference(getString(R.string.firebase_liquidationLog_ref))
 
+        FirebaseDatabase().fetchDataSubmission(dbRef, qrRead[0]) {
+            binding.qrScanProgress.visibility = View.GONE
+            oldData = it
+            if (!isQrdataprocessingLoaded) {
+                qrDataProcessing()
+            }
+        }
+    }
 
     private fun stopCamera() {
         cameraProvider.unbindAll()
@@ -473,14 +491,19 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
         cameraExecutor.shutdown()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+    }
     private fun requestCameraPermission() {
         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
     override fun exitListener(data: SubmissionDataClass) {
         scannedData = data
-        binding.qrScanSchoolName.text = data.Sch
-        binding.qrScanHead.text = checkHead(data.Sch!!)
+        binding.qrScanSchoolName.text = data.sch
+        checkHead(data.sch!!){
+            binding.qrScanHead.text = it
+        }
         val typeLR = resources.getStringArray(R.array.lr_types)
         when (data.typ) {
             typeLR[0] -> {
@@ -518,17 +541,17 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
 
     }
 
-    private fun checkHead(sch: String): String? {
-        dataBaseHelper.queryDataAtTable1(
-            dataBaseHelper.readableDatabase,
-            arrayOf(getString(R.string.sch_name), getString(R.string.sch_head))
-        ).also {
-            if (it?.size!! > 0) {
-                if (it.contains(sch)) {
-                    return it[it.indexOf(sch) + 1]
+    private fun checkHead(sch: String, callback : (String?) -> Unit){
+        FirebaseDatabase().fetchDataQR(
+            com.google.firebase.database.FirebaseDatabase.getInstance()
+                .getReference(getString(R.string.firebase_qrdata_ref))
+        ) {
+
+            for (data in it) {
+                if (data.sch_name == sch) {
+                    callback(data.sch_head)
                 }
             }
         }
-        return null
     }
 }

@@ -39,7 +39,7 @@ class QrScanDialogFragment : DialogFragment(), RecyclerAdapterQrScan.OnItemDialo
             }.setOnItemClickListener(this)
 
             binding.qrScanOldDataList.layoutManager = LinearLayoutManager(requireContext())
-            return listOf(data[0].Sch, data.size.toString())
+            return listOf(data[0].sch, data.size.toString())
         }
 
     }

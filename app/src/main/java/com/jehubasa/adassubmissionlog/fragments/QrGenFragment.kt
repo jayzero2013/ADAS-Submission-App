@@ -1,5 +1,6 @@
 package com.jehubasa.adassubmissionlog.fragments
 
+import com.jehubasa.adassubmissionlog.FirebaseDatabase
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -23,6 +24,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.transition.MaterialFadeThrough
+import com.google.android.material.transition.MaterialSharedAxis
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
@@ -34,6 +36,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class QrGenFragment : Fragment() {
 
@@ -69,8 +72,10 @@ class QrGenFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        exitTransition = MaterialFadeThrough()
-        enterTransition = MaterialFadeThrough()
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
 
     }
 
@@ -143,7 +148,7 @@ class QrGenFragment : Fragment() {
             "com.jehubasa.adassubmissionlog" + ".provider",
             file
         )
-        val shareIntent = Intent(Intent.ACTION_SEND).apply{
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "image/*"
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -153,39 +158,44 @@ class QrGenFragment : Fragment() {
     }
 
     private fun initAutoComplete() {
-        val db = dbhelper?.readableDatabase
-        val schRecentData = dbhelper?.queryDataAtTable1(db, arrayOf("sch_name"))
-        val schHeadRecentData = dbhelper?.queryDataAtTable1(db, arrayOf("sch_head"))
 
-        schRecentData?.let {
-            (binding.qrGenSchoolName as? MaterialAutoCompleteTextView)?.setSimpleItems(
-                it.toTypedArray()
-            )
+        val schRecentData = ArrayList<String?>()
+        var schHeadRecentData = ArrayList<String?>()
+        FirebaseDatabase().fetchDataQR(
+            com.google.firebase.database.FirebaseDatabase.getInstance()
+                .getReference(getString(R.string.firebase_qrdata_ref))
+        ) {
+            for (content in it) {
+                if(!schRecentData.contains(content.sch_name)){schRecentData += content.sch_name}
+                if(!schHeadRecentData.contains(content.sch_head)){
+                    schHeadRecentData += content.sch_head}
+            }
+            schRecentData.let {
+                (binding.qrGenSchoolName as? MaterialAutoCompleteTextView)?.setSimpleItems(
+                    it.toTypedArray()
+                )
+            }
+
+            schHeadRecentData.let {
+                (binding.qrGenSchoolHead as? MaterialAutoCompleteTextView)?.setSimpleItems(
+                    it.toTypedArray()
+                )
+            }
         }
-
-        schHeadRecentData?.let {
-            (binding.qrGenSchoolHead as? MaterialAutoCompleteTextView)?.setSimpleItems(
-                it.toTypedArray()
-            )
-        }
-
     }
 
     private fun saveData() {
-        val db = dbhelper?.writableDatabase
-        val data = arrayOf(
+        val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance()
+            .getReference(getString(R.string.firebase_qrdata_ref))
+        val id = dbRef.push().key!!
+        FirebaseDatabase().initQrDatabase(
+            dbRef,
             QrInfoDataClass(
-                null, binding.qrGenSchoolName.text.toString(),
+                id,
+                binding.qrGenSchoolName.text.toString(),
                 binding.qrGenSchoolHead.text.toString()
             )
         )
-
-        if (dbhelper?.insertDateAtTable1(db, data)!! > -1) {
-            Log.d("SDP", "QR Gen Data Saved")
-        } else {
-            Log.e("SDP", "QR Gen Data Error")
-        }
-
     }
 
     private fun makeData() {

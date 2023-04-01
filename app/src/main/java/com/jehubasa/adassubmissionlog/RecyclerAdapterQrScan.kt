@@ -22,9 +22,13 @@ class RecyclerAdapterQrScan(val data: List<SubmissionDataClass>) :
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        binding.recyclerSchName.text = data[position].Sch
+        binding.recyclerSchName.text = data[position].sch
         binding.recyclerLrType.text = data[position].typ
-        binding.recyclerDivStatus.text = data[position].sd
+        binding.recyclerDivStatus.text = data[position].sd.let {
+            if(it == "true"){
+                "Yes"
+            } else {"Not Yet"}
+        }
         binding.recyclerTimesSubmit.text = data[position].tos.toString()
         when (data[position].tos) {
             1 -> {

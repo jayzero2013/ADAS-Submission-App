@@ -5,19 +5,19 @@ import android.os.Parcelable
 
 
 data class SubmissionDataClass(
-    val id: Int?,
-    val Sch: String?,//school name
-    val typ: String?,//type of LR
-    val ds: String?,//submission date
-    val dr: String?,//Released date
-    val tos: Int?,//times of submission
-    val sb: String?,//submitted by
-    val rt: String?,//released to whom
-    val sd: String?,//submitted to division
-    val tsd: String?//time submitted to division
+    val id: String? = null,
+    val sch: String?= null,//school name
+    val typ: String?= null,//type of LR
+    val ds: String?= null,//submission date
+    val dr: String?= null,//Released date
+    val tos: Int?= null,//times of submission
+    val sb: String?= null,//submitted by
+    val rt: String?= null,//released to whom
+    val sd: String?= null,//submitted to division
+    val tsd: String?= null//time submitted to division
 ) : Parcelable{
     constructor(parcel: Parcel) : this(
-        parcel.readValue(Int::class.java.classLoader) as? Int,
+        parcel.readString(),
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
@@ -32,7 +32,7 @@ data class SubmissionDataClass(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeValue(id)
-        parcel.writeString(Sch)
+        parcel.writeString(sch)
         parcel.writeString(typ)
         parcel.writeString(ds)
         parcel.writeString(dr)
@@ -56,5 +56,19 @@ data class SubmissionDataClass(
             return arrayOfNulls(size)
         }
     }
+        fun toMap(): Map<String, Any> {
+            val result = HashMap<String, Any>()
+            result["id"] = id!!
+            result["sch"] = sch!!
+            result["typ"] = typ!!
+            result["ds"] = ds!!
+            result["dr"] = dr!!
+            result["tos"] = tos!!
+            result["sb"] = sb!!
+            result["rt"] = rt!!
+            result["sd"] = sd!!
+            result["tsd"] = tsd!!
+            return result
 
+    }
 }

@@ -5,6 +5,7 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -15,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ADASSubmissionLog"
         tools:targetApi="31"
-
+        android:name=".ADASSubmissionLogApp"
         >
         <activity
             android:name=".MainActivity"

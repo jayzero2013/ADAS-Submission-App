@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "390290785306",
+    "project_id": "adas-submission--log",
+    "storage_bucket": "adas-submission--log.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:390290785306:android:0e2e497588d459b3c8fda3",
+        "android_client_info": {
+          "package_name": "com.jehubasa.adassubmissionlog"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "390290785306-e2dd437vge3ennl84b5t8ongi2928c6q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnniuHZnBfIZIvvPmS7XJANxfFUTVFoHg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "390290785306-e2dd437vge3ennl84b5t8ongi2928c6q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

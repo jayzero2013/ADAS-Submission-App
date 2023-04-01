@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import android.widget.Toast
@@ -14,7 +15,8 @@ import androidx.core.content.FileProvider
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.transition.MaterialFadeThrough
+import com.google.android.material.transition.MaterialSharedAxis
+import com.google.firebase.database.FirebaseDatabase
 import com.jehubasa.adassubmissionlog.QrGenDataBaseHelper
 import com.jehubasa.adassubmissionlog.R
 import com.jehubasa.adassubmissionlog.data.SubmissionDataClass
@@ -23,6 +25,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.max
 
 class CheckStatusFragment : Fragment() {
 
@@ -32,8 +35,10 @@ class CheckStatusFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        exitTransition = MaterialFadeThrough()
-        enterTransition = MaterialFadeThrough()
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
 
     }
 
@@ -113,66 +118,76 @@ class CheckStatusFragment : Fragment() {
             .build()
         dateRangePicker.show(parentFragmentManager, "date_range")
         dateRangePicker.addOnPositiveButtonClickListener {
-
+            binding.statusProgress.visibility = View.VISIBLE
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val date1 = dateFormat.format(Date(it.first))
             val date2 = dateFormat.format(Date(it.second))
+            binding.statusTableLayout.removeViews(1, max(0, binding.statusTableLayout.childCount-1))
             retrieveData(date1, date2)
         }
 
     }
 
     private fun retrieveData(date1: String, date2: String) {
-        data = dataBaseHelper.queryDateRange(
-            dataBaseHelper.readableDatabase,
-            arrayOf(getString(R.string.submDate), date1, date2)
-        )
 
-        val tableLayout = binding.statusTableLayout
+        val dbref = FirebaseDatabase.getInstance().getReference(getString(R.string.firebase_liquidationLog_ref))
 
-        for (d in data.indices) {
-            val dataRow = TableRow(context)
-            dataRow.addView(TextView(context).apply {
-                text = data[d].Sch
-                setTextColor(Color.BLACK)
-                setPadding(10, 10, 10, 10)
-            })
-            dataRow.addView(TextView(context).apply {
-                text = data[d].typ
-                setPadding(10, 10, 10, 10)
-            })
+        com.jehubasa.adassubmissionlog.FirebaseDatabase().fetchDataSubmissionDateRange(dbref,date1,date2){
 
-            dataRow.addView(TextView(context).apply {
-                text = data[d].ds
-                setPadding(10, 10, 10, 10)
-            })
+            binding.statusProgress.visibility = View.GONE
+            val tableLayout :TableLayout? = binding.statusTableLayout
 
-            dataRow.addView(TextView(context).apply {
-                text = data[d].dr
-                setPadding(10, 10, 10, 10)
-            })
+            for (d in it.indices) {
+                val dataRow :TableRow? = TableRow(context)
+                dataRow?.addView(TextView(context).apply {
+                    text = it[d].sch
+                    setTextColor(Color.BLACK)
+                    setPadding(10, 10, 10, 10)
+                })
+                dataRow?.addView(TextView(context).apply {
+                    text = it[d].typ
+                    setPadding(10, 10, 10, 10)
+                })
 
-            dataRow.addView(TextView(context).apply {
-                text = data[d].tos.toString()
-                setPadding(10, 10, 10, 10)
-            })
+                dataRow?.addView(TextView(context).apply {
+                    text = it[d].ds
+                    setPadding(10, 10, 10, 10)
+                })
 
-            dataRow.addView(TextView(context).apply {
-                text = data[d].sb
-                setPadding(10, 10, 10, 10)
-            })
+                dataRow?.addView(TextView(context).apply {
+                    text = it[d].dr
+                    setPadding(10, 10, 10, 10)
+                })
 
-            dataRow.addView(TextView(context).apply {
-                text = data[d].rt
-                setPadding(10, 10, 10, 10)
-            })
+                dataRow?.addView(TextView(context).apply {
+                    text = it[d].tos.toString()
+                    setPadding(10, 10, 10, 10)
+                })
 
-            dataRow.addView(TextView(context).apply {
-                text = data[d].tsd
-                setPadding(10, 10, 10, 10)
-            })
+                dataRow?.addView(TextView(context).apply {
+                    text = it[d].sb
+                    setPadding(10, 10, 10, 10)
+                })
 
-            tableLayout.addView(dataRow)
+                dataRow?.addView(TextView(context).apply {
+                    text = it[d].rt
+                    setPadding(10, 10, 10, 10)
+                })
+
+                dataRow?.addView(TextView(context).apply {
+                    text = it[d].tsd
+                    setPadding(10, 10, 10, 10)
+                })
+
+                tableLayout?.addView(dataRow)
+            }
         }
+
+//        data = dataBaseHelper.queryDateRange(
+//            dataBaseHelper.readableDatabase,
+//            arrayOf(getString(R.string.submDate), date1, date2)
+//        )
+
+
     }
 }

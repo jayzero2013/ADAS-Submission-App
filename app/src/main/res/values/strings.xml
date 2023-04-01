@@ -65,6 +65,10 @@
     <string name="about_desc">Department of Education \n Administrative Assistant Log App</string>
     <string name="open_camera">Open camera</string>
     <string name="clear_field">clear_field</string>
+    <string name="firebase_qrdata_ref">QRDATA</string>
+    <string name="firebase_liquidationLog_ref">Liquidation_Log</string>
+    <string name="email">jehubasa96@gmail.com</string>
+    <string name="password">zero2012</string>
 
     <string-array name="lr_types">
         <item>1st Quarter</item>

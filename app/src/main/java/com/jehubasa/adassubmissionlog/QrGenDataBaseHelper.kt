@@ -91,7 +91,7 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
     fun insertDateAtTable2(db: SQLiteDatabase?, data: Array<SubmissionDataClass>): Long {
         for (d in data) {
             val values = ContentValues().apply {
-                put(schName2, d.Sch)
+                put(schName2, d.sch)
                 put(lrType, d.typ)
                 put(submDate, d.ds)
                 put(releDate, d.dr)
@@ -117,7 +117,7 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
             while (this!!.moveToNext()) {
                 data.add(
                     SubmissionDataClass(
-                        getInt(getColumnIndexOrThrow("id")),
+                        getString(getColumnIndexOrThrow("id")),
                         getString(getColumnIndexOrThrow(schName2)),
                         getString(getColumnIndexOrThrow(lrType)),
                         getString(getColumnIndexOrThrow(submDate)),
@@ -148,7 +148,7 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
             while (this!!.moveToNext()) {
                 data.add(
                     SubmissionDataClass(
-                        getInt(getColumnIndexOrThrow("id")),
+                        getString(getColumnIndexOrThrow("id")),
                         getString(getColumnIndexOrThrow(schName2)),
                         getString(getColumnIndexOrThrow(lrType)),
                         getString(getColumnIndexOrThrow(submDate)),
@@ -170,7 +170,7 @@ class QrGenDataBaseHelper(context: Context?) : SQLiteOpenHelper(
 
     fun updateDataAtTable2(db: SQLiteDatabase?, id: Int?, d: SubmissionDataClass?): Int? {
         val values = ContentValues().apply {
-            put(schName2, d?.Sch)
+            put(schName2, d?.sch)
             put(lrType, d?.typ)
             put(submDate, d?.ds)
             put(releDate, d?.dr)
