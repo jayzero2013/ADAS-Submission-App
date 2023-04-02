@@ -70,6 +70,8 @@
     <string name="email">jehubasa96@gmail.com</string>
     <string name="password">zero2012</string>
     <string name="imagebackground">imagebackground</string>
+    <string name="type_of_liquidation_report_label">Type of liquidation report</string>
+    <string name="status_instructions">This page will show all the existing data you entered.\nTo start, tap the filter button and input the range of the\n submission date you want to show.\n\n You can save the table as PDF by tapping\n the save button on the upper right corner.</string>
 
     <string-array name="lr_types">
         <item>1st Quarter</item>

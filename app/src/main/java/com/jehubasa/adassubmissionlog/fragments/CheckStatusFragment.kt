@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.pdf.PdfDocument
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -129,58 +130,70 @@ class CheckStatusFragment : Fragment() {
 
     private fun retrieveData(date1: String, date2: String) {
 
-        val dbref = FirebaseDatabase.getInstance().getReference(getString(R.string.firebase_liquidationLog_ref))
+        val dbRef = FirebaseDatabase.getInstance().getReference(getString(R.string.firebase_liquidationLog_ref))
 
-        com.jehubasa.adassubmissionlog.FirebaseDatabase().fetchDataSubmissionDateRange(dbref,date1,date2){
+        com.jehubasa.adassubmissionlog.FirebaseDatabase().fetchDataSubmissionDateRange(dbRef,date1,date2){
+            if(!it.isNullOrEmpty()){
 
-            binding.statusProgress.visibility = View.GONE
-            val tableLayout  = binding.statusTableLayout
+                binding.statusProgress.visibility = View.GONE
+                binding.statusInstruction.visibility = View.GONE
+                val tableLayout  = binding.statusTableLayout
 
-            for (d in it.indices) {
-                val dataRow = TableRow(context)
-                dataRow.addView(TextView(context).apply {
-                    text = it[d].sch
-                    setTextColor(Color.BLACK)
-                    setPadding(10, 10, 10, 10)
-                })
-                dataRow.addView(TextView(context).apply {
-                    text = it[d].typ
-                    setPadding(10, 10, 10, 10)
-                })
+                for (d in it.indices) {
+                    val dataRow = TableRow(context)
+                    dataRow.addView(TextView(context).apply {
+                        text = it[d].sch
+                        setTextColor(Color.BLACK)
+                        setPadding(10, 10, 10, 10)
+                        gravity = Gravity.CENTER
+                    })
+                    dataRow.addView(TextView(context).apply {
+                        text = it[d].typ
+                        setPadding(10, 10, 10, 10)
+                        gravity = Gravity.CENTER
+                    })
 
-                dataRow.addView(TextView(context).apply {
-                    text = it[d].ds
-                    setPadding(10, 10, 10, 10)
-                })
+                    dataRow.addView(TextView(context).apply {
+                        text = it[d].ds
+                        setPadding(10, 10, 10, 10)
+                        gravity = Gravity.CENTER
+                    })
 
-                dataRow.addView(TextView(context).apply {
-                    text = it[d].dr
-                    setPadding(10, 10, 10, 10)
-                })
+                    dataRow.addView(TextView(context).apply {
+                        text = it[d].dr
+                        setPadding(10, 10, 10, 10)
+                        gravity = Gravity.CENTER
+                    })
 
-                dataRow.addView(TextView(context).apply {
-                    text = it[d].tos.toString()
-                    setPadding(10, 10, 10, 10)
-                })
+                    dataRow.addView(TextView(context).apply {
+                        text = it[d].tos.toString()
+                        setPadding(10, 10, 10, 10)
+                        gravity = Gravity.CENTER
+                    })
 
-                dataRow.addView(TextView(context).apply {
-                    text = it[d].sb
-                    setPadding(10, 10, 10, 10)
-                })
+                    dataRow.addView(TextView(context).apply {
+                        text = it[d].sb
+                        setPadding(10, 10, 10, 10)
+                        gravity = Gravity.CENTER
+                    })
 
-                dataRow.addView(TextView(context).apply {
-                    text = it[d].rt
-                    setPadding(10, 10, 10, 10)
-                })
+                    dataRow.addView(TextView(context).apply {
+                        text = it[d].rt
+                        setPadding(10, 10, 10, 10)
+                        gravity = Gravity.CENTER
+                    })
 
-                dataRow.addView(TextView(context).apply {
-                    text = it[d].tsd
-                    setPadding(10, 10, 10, 10)
-                })
+                    dataRow.addView(TextView(context).apply {
+                        text = it[d].tsd
+                        setPadding(10, 10, 10, 10)
+                        gravity = Gravity.CENTER
+                    })
 
-                tableLayout.addView(dataRow)
-                data = it
-            }
+                    tableLayout.addView(dataRow)
+                    data = it
+                    binding.statusNoItems.text = it.size.toString()
+                }
+            } else {Toast.makeText(requireContext(), "No existing data", Toast.LENGTH_LONG).show()}
         }
 
     }

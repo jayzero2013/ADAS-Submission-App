@@ -1,6 +1,5 @@
 package com.jehubasa.adassubmissionlog.fragments
 
-import com.jehubasa.adassubmissionlog.FirebaseDatabase
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,9 +12,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView
-import android.widget.AdapterView.OnItemSelectedListener
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -23,12 +19,11 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
-import com.google.android.material.transition.MaterialFadeThrough
 import com.google.android.material.transition.MaterialSharedAxis
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
-import com.jehubasa.adassubmissionlog.QrGenDataBaseHelper
+import com.jehubasa.adassubmissionlog.FirebaseDatabase
 import com.jehubasa.adassubmissionlog.R
 import com.jehubasa.adassubmissionlog.data.QrInfoDataClass
 import com.jehubasa.adassubmissionlog.databinding.FragmentQrGenBinding
@@ -36,15 +31,12 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class QrGenFragment : Fragment() {
 
     private lateinit var binding: FragmentQrGenBinding
-    private var lrtype: String? = ""
-    private val dbhelper: QrGenDataBaseHelper? by lazy {
-        QrGenDataBaseHelper(context)
-    }
+    private var storedData: ArrayList<QrInfoDataClass> = arrayListOf()
+
     private val date: String by lazy {
         val calendar = Calendar.getInstance()
         SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time).also {
@@ -72,10 +64,14 @@ class QrGenFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
+        exitTransition =
+            MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ true).setDuration(500)
+        reenterTransition =
+            MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ false).setDuration(500)
+        enterTransition =
+            MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ true).setDuration(500)
+        returnTransition =
+            MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ false).setDuration(500)
 
     }
 
@@ -92,7 +88,7 @@ class QrGenFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initSpinner()
+        //initSpinner()
         initAutoComplete()
 
         binding.genButton.setOnClickListener {
@@ -160,15 +156,19 @@ class QrGenFragment : Fragment() {
     private fun initAutoComplete() {
 
         val schRecentData = ArrayList<String?>()
-        var schHeadRecentData = ArrayList<String?>()
+        val schHeadRecentData = ArrayList<String?>()
         FirebaseDatabase().fetchDataQR(
             com.google.firebase.database.FirebaseDatabase.getInstance()
                 .getReference(getString(R.string.firebase_qrdata_ref))
         ) {
+            storedData = it
             for (content in it) {
-                if(!schRecentData.contains(content.sch_name)){schRecentData += content.sch_name}
-                if(!schHeadRecentData.contains(content.sch_head)){
-                    schHeadRecentData += content.sch_head}
+                if (!schRecentData.contains(content.sch_name)) {
+                    schRecentData += content.sch_name
+                }
+                if (!schHeadRecentData.contains(content.sch_head)) {
+                    schHeadRecentData += content.sch_head
+                }
             }
             schRecentData.let {
                 (binding.qrGenSchoolName as? MaterialAutoCompleteTextView)?.setSimpleItems(
@@ -185,24 +185,43 @@ class QrGenFragment : Fragment() {
     }
 
     private fun saveData() {
-        val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance()
-            .getReference(getString(R.string.firebase_qrdata_ref))
-        val id = dbRef.push().key!!
-        FirebaseDatabase().initQrDatabase(
-            dbRef,
-            QrInfoDataClass(
-                id,
+
+        if (!checkIfExisting(
                 binding.qrGenSchoolName.text.toString(),
                 binding.qrGenSchoolHead.text.toString()
             )
-        )
+        ) {
+            val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance()
+                .getReference(getString(R.string.firebase_qrdata_ref))
+            val id = dbRef.push().key!!
+            FirebaseDatabase().initQrDatabase(
+                dbRef,
+                QrInfoDataClass(
+                    id,
+                    binding.qrGenSchoolName.text.toString(),
+                    binding.qrGenSchoolHead.text.toString()
+                )
+            )
+        } else{ Log.e("ASP", "data already exist ( ${binding.qrGenSchoolName.text
+            }, ${binding.qrGenSchoolHead.text})")}
+    }
+
+    private fun checkIfExisting(name: String, head: String): Boolean {
+        if (!storedData.isNullOrEmpty()) {
+            for (data in storedData) {
+                if (data.sch_name == name && data.sch_head == head) {
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     private fun makeData() {
 
-
         if (!binding.qrGenSchoolName.text.isNullOrEmpty() &&
-            !binding.qrGenSchoolHead.text.isNullOrEmpty()
+            !binding.qrGenSchoolHead.text.isNullOrEmpty() &&
+            !binding.qrGenTypeLq.text.isNullOrEmpty()
         ) {
 
             MaterialAlertDialogBuilder(requireContext())
@@ -211,13 +230,13 @@ class QrGenFragment : Fragment() {
                 .setPositiveButton("Yes, proceed") { _, _ ->
                     drawQr(
                         "${binding.qrGenSchoolName.text}/${binding.qrGenSchoolHead.text}" +
-                                "/$lrtype/$date"
+                                "/${binding.qrGenTypeLq.text}/$date"
                     )
                 }
                 .setNegativeButton("No") { _, _ ->
                     drawQr(
                         "${binding.qrGenSchoolName.text}/${binding.qrGenSchoolHead.text}" +
-                                "/$lrtype"
+                                "/${binding.qrGenTypeLq.text}"
                     )
                 }
                 .show()
@@ -241,32 +260,6 @@ class QrGenFragment : Fragment() {
         binding.qrLayoutSchHead.text = "Head: ${binding.qrGenSchoolHead.text}"
     }
 
-    private fun initSpinner() {
-        ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.lr_types,
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.lrTypeSpinner.adapter = adapter
-        }
-
-        binding.lrTypeSpinner.onItemSelectedListener = object : OnItemSelectedListener,
-            AdapterView.OnItemClickListener {
-            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                lrtype = p0?.getItemAtPosition(p2) as String
-            }
-
-            override fun onNothingSelected(p0: AdapterView<*>?) {
-                lrtype = p0?.toString()
-            }
-
-            override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-
-            }
-        }
-
-    }
 
     private fun generateQR(qrCodeContent: String): Bitmap {
         val size = 512 //pixels
