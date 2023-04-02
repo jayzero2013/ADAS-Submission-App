@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import android.widget.Toast
@@ -35,10 +34,10 @@ class CheckStatusFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ true).setDuration(500)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ false).setDuration(500)
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ true).setDuration(500)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ false).setDuration(500)
 
     }
 
@@ -65,7 +64,7 @@ class CheckStatusFragment : Fragment() {
             if (data.isNotEmpty()) {
                 saveData()
             } else {
-                Toast.makeText(requireContext(), "Not Data", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "No Data", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -135,59 +134,54 @@ class CheckStatusFragment : Fragment() {
         com.jehubasa.adassubmissionlog.FirebaseDatabase().fetchDataSubmissionDateRange(dbref,date1,date2){
 
             binding.statusProgress.visibility = View.GONE
-            val tableLayout :TableLayout? = binding.statusTableLayout
+            val tableLayout  = binding.statusTableLayout
 
             for (d in it.indices) {
-                val dataRow :TableRow? = TableRow(context)
-                dataRow?.addView(TextView(context).apply {
+                val dataRow = TableRow(context)
+                dataRow.addView(TextView(context).apply {
                     text = it[d].sch
                     setTextColor(Color.BLACK)
                     setPadding(10, 10, 10, 10)
                 })
-                dataRow?.addView(TextView(context).apply {
+                dataRow.addView(TextView(context).apply {
                     text = it[d].typ
                     setPadding(10, 10, 10, 10)
                 })
 
-                dataRow?.addView(TextView(context).apply {
+                dataRow.addView(TextView(context).apply {
                     text = it[d].ds
                     setPadding(10, 10, 10, 10)
                 })
 
-                dataRow?.addView(TextView(context).apply {
+                dataRow.addView(TextView(context).apply {
                     text = it[d].dr
                     setPadding(10, 10, 10, 10)
                 })
 
-                dataRow?.addView(TextView(context).apply {
+                dataRow.addView(TextView(context).apply {
                     text = it[d].tos.toString()
                     setPadding(10, 10, 10, 10)
                 })
 
-                dataRow?.addView(TextView(context).apply {
+                dataRow.addView(TextView(context).apply {
                     text = it[d].sb
                     setPadding(10, 10, 10, 10)
                 })
 
-                dataRow?.addView(TextView(context).apply {
+                dataRow.addView(TextView(context).apply {
                     text = it[d].rt
                     setPadding(10, 10, 10, 10)
                 })
 
-                dataRow?.addView(TextView(context).apply {
+                dataRow.addView(TextView(context).apply {
                     text = it[d].tsd
                     setPadding(10, 10, 10, 10)
                 })
 
-                tableLayout?.addView(dataRow)
+                tableLayout.addView(dataRow)
+                data = it
             }
         }
-
-//        data = dataBaseHelper.queryDateRange(
-//            dataBaseHelper.readableDatabase,
-//            arrayOf(getString(R.string.submDate), date1, date2)
-//        )
-
 
     }
 }
