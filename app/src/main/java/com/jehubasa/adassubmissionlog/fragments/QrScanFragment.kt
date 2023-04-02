@@ -54,10 +54,10 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ true).setDuration(500)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ false).setDuration(500)
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ true).setDuration(500)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ false).setDuration(500)
 
         cameraPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -233,7 +233,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
             requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(binding.qrScanSave.windowToken, 0)
 
-        binding.qrScanScrollView.scrollY = binding.qrScanScrollView.scrollY - 1500
+        //binding.qrScanScrollView.scrollY = binding.qrScanScrollView.scrollY - 1500
     }
 
     private fun updateData(id: String?) {

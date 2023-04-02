@@ -69,6 +69,7 @@
     <string name="firebase_liquidationLog_ref">Liquidation_Log</string>
     <string name="email">jehubasa96@gmail.com</string>
     <string name="password">zero2012</string>
+    <string name="imagebackground">imagebackground</string>
 
     <string-array name="lr_types">
         <item>1st Quarter</item>
