@@ -39,5 +39,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_nav"
         style= "@style/Widget.Material3.BottomNavigationView"
-        tools:ignore="VisualLintBottomNav" />
+        tools:ignore="VisualLintBottomNav"
+        app:itemIconTint="?attr/colorOnSecondaryContainer"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

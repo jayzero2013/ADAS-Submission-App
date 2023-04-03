@@ -73,6 +73,8 @@
     <string name="type_of_liquidation_report_label">Type of liquidation report</string>
     <string name="status_instructions">This page will show all the existing data you entered.\nTo start, tap the filter button and input the range of the\n submission date you want to show.\n\n You can save the table as PDF by tapping\n the save button on the upper right corner.</string>
     <string name="additions">Additions</string>
+    <string name="for_filter_options_FAB">for filter options</string>
+    <string name="name_of_school">Name of School</string>
 
     <string-array name="lr_types">
         <item>1st Quarter</item>

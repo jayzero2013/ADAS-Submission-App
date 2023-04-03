@@ -9,6 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.commit
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateOptions
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.auth.FirebaseAuth
 import com.jehubasa.adassubmissionlog.databinding.ActivityMainBinding
 import com.jehubasa.adassubmissionlog.fragments.AboutFragment
@@ -19,12 +24,16 @@ import com.jehubasa.adassubmissionlog.fragments.QrScanFragment
 class MainActivity : AppCompatActivity(),
     com.google.android.material.navigation.NavigationBarView.OnItemSelectedListener {
 
+    private  lateinit var updateManager: AppUpdateManager
     private lateinit var binding: ActivityMainBinding
     private val INTERNET_PERMISSION_CODE = 1
+    private val UPDATE_REQUEST_CODE= 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        isUpdateAvailable()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -62,6 +71,23 @@ class MainActivity : AppCompatActivity(),
                 }
             }
 
+    }
+
+    private fun isUpdateAvailable() {
+        updateManager = AppUpdateManagerFactory.create(this)
+        val appUpdateInfoTask = updateManager.appUpdateInfo
+        AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+            ) {
+                updateManager.startUpdateFlowForResult(
+                    appUpdateInfo,
+                    AppUpdateType.IMMEDIATE,
+                    this, UPDATE_REQUEST_CODE
+                )
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(

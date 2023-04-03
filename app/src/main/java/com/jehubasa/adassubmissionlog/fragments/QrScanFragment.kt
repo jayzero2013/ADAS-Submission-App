@@ -22,7 +22,6 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.transition.MaterialSharedAxis
 import com.jehubasa.adassubmissionlog.FirebaseDatabase
 import com.jehubasa.adassubmissionlog.QRCodeAnalyzer
 import com.jehubasa.adassubmissionlog.QrGenDataBaseHelper
@@ -53,11 +52,6 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ true).setDuration(500)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ false).setDuration(500)
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ true).setDuration(500)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ false).setDuration(500)
 
         cameraPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->

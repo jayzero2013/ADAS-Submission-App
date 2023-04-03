@@ -31,7 +31,7 @@ class FirebaseDatabase() {
     }
 
     fun fetchDataQR(dbRef: DatabaseReference, callback: (ArrayList<QrInfoDataClass>) -> Unit) {
-        var temp: ArrayList<QrInfoDataClass> = arrayListOf()
+        val temp: ArrayList<QrInfoDataClass> = arrayListOf()
         dbRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
@@ -60,7 +60,7 @@ class FirebaseDatabase() {
         filter: String,
         callback: (ArrayList<SubmissionDataClass>) -> Unit
     ) {
-        var temp: ArrayList<SubmissionDataClass> = arrayListOf()
+        val temp: ArrayList<SubmissionDataClass> = arrayListOf()
 
         val query = dbRef.orderByChild("sch").equalTo(filter)
 
@@ -115,10 +115,40 @@ class FirebaseDatabase() {
         endDate: String,
         callback: (ArrayList<SubmissionDataClass>) -> Unit
     ){
-
-        var temp: ArrayList<SubmissionDataClass> = arrayListOf()
+        val temp: ArrayList<SubmissionDataClass> = arrayListOf()
 
         val query = dbRef.orderByChild("ds").startAt(startDate).endAt(endDate)
+
+        query.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    for (snap in snapshot.children) {
+                        val data = snap.getValue(SubmissionDataClass::class.java)
+                        Log.d("ASP", "fetch data $data")
+                        temp.add(data!!)
+                    }
+                    callback(temp)
+
+                } else {
+                    Log.d("ASP", "No Data to fetch in Submission")
+                    callback(temp)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.d("ASP", "data fetch error")
+            }
+        })
+    }
+
+    fun fetchDataSubmissionSchool(
+        dbRef: DatabaseReference,
+        sch: String,
+        callback: (ArrayList<SubmissionDataClass>) -> Unit
+    ){
+        val temp: ArrayList<SubmissionDataClass> = arrayListOf()
+
+        val query = dbRef.orderByChild("sch").equalTo(sch)
 
         query.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {

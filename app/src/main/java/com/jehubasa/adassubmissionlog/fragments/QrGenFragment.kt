@@ -19,7 +19,6 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
-import com.google.android.material.transition.MaterialSharedAxis
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
@@ -62,19 +61,6 @@ class QrGenFragment : Fragment() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        exitTransition =
-            MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ true).setDuration(500)
-        reenterTransition =
-            MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ false).setDuration(500)
-        enterTransition =
-            MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ true).setDuration(500)
-        returnTransition =
-            MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ false).setDuration(500)
-
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -92,8 +78,14 @@ class QrGenFragment : Fragment() {
         initAutoComplete()
 
         binding.genButton.setOnClickListener {
-            makeData()
-            saveData()
+            if(binding.qrGenSchoolName.text.isNotEmpty()&&
+                binding.qrGenSchoolHead.text.isNotEmpty() &&
+                    binding.qrGenTypeLq.text.isNotEmpty()){
+                makeData()
+                saveData()
+            } else {
+                Toast.makeText(activity, "Fill up the fields", Toast.LENGTH_LONG).show()
+            }
         }
 
         binding.qrGenSend.setOnClickListener {
@@ -185,7 +177,6 @@ class QrGenFragment : Fragment() {
     }
 
     private fun saveData() {
-
         if (!checkIfExisting(
                 binding.qrGenSchoolName.text.toString(),
                 binding.qrGenSchoolHead.text.toString()
@@ -203,11 +194,11 @@ class QrGenFragment : Fragment() {
                 )
             )
         } else{ Log.e("ASP", "data already exist ( ${binding.qrGenSchoolName.text
-            }, ${binding.qrGenSchoolHead.text})")}
+        }, ${binding.qrGenSchoolHead.text})")}
     }
 
     private fun checkIfExisting(name: String, head: String): Boolean {
-        if (!storedData.isNullOrEmpty()) {
+        if (storedData.isNotEmpty()) {
             for (data in storedData) {
                 if (data.sch_name == name && data.sch_head == head) {
                     return true

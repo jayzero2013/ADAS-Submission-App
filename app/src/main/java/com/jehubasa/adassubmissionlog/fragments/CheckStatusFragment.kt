@@ -1,9 +1,11 @@
 package com.jehubasa.adassubmissionlog.fragments
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.pdf.PdfDocument
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +17,9 @@ import androidx.core.content.FileProvider
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.transition.MaterialSharedAxis
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.jehubasa.adassubmissionlog.QrGenDataBaseHelper
 import com.jehubasa.adassubmissionlog.R
@@ -32,14 +36,9 @@ class CheckStatusFragment : Fragment() {
     private lateinit var binding: FragmentCheckStatusBinding
     private lateinit var dataBaseHelper: QrGenDataBaseHelper
     private var data: List<SubmissionDataClass> = listOf()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ true).setDuration(500)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ false).setDuration(500)
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ true).setDuration(500)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward = */ false).setDuration(500)
-
+    private var fabState = false
+    private val dbRef: DatabaseReference by lazy {
+        FirebaseDatabase.getInstance().getReference(getString(R.string.firebase_liquidationLog_ref))
     }
 
     override fun onCreateView(
@@ -57,17 +56,78 @@ class CheckStatusFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.statusDateFilterButton.setOnClickListener {
-            openCalendar()
-        }
+        with(binding) {
+            statusDateFilterButton.setOnClickListener {
+                openCalendar()
+            }
 
-        binding.statusDateSaveButton.setOnClickListener {
-            if (data.isNotEmpty()) {
-                saveData()
-            } else {
-                Toast.makeText(requireContext(), "No Data", Toast.LENGTH_LONG).show()
+            statusPrintButton.setOnClickListener {
+                if (data.isNotEmpty()) {
+                    saveData()
+                } else {
+                    Toast.makeText(requireContext(), "No Data", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            statusFilterOption.setOnClickListener {
+                if (!fabState) {
+                    statusDateFilterButton.show()
+                    statusPrintButton.show()
+                    statusSchoolFilterButton.show()
+                    fabState = true
+                } else {
+                    statusDateFilterButton.hide()
+                    statusPrintButton.hide()
+                    statusSchoolFilterButton.hide()
+                    fabState = false
+                }
+            }
+
+            statusSchoolFilterButton.setOnClickListener {
+                schoolFilter()
             }
         }
+    }
+
+    private fun schoolFilter() {
+        val view = layoutInflater.inflate(R.layout.alert_dialog_school_filter, null)
+        val editText = view.findViewById<MaterialAutoCompleteTextView>(R.id.filter_school)
+        //fill the autocomplete of schools
+        val schools: ArrayList<String?> = arrayListOf()
+        com.jehubasa.adassubmissionlog.FirebaseDatabase().fetchDataQR(
+            FirebaseDatabase.getInstance()
+                .getReference(getString(R.string.firebase_qrdata_ref))
+        ) {
+            for (content in it) {
+                if (!schools.contains(content.sch_name)) {
+                    schools += content.sch_name
+                }
+            }
+            schools.let { sch ->
+                editText?.setSimpleItems(
+                    sch.toTypedArray()
+                )
+            }
+        }
+
+        val alertDialog = MaterialAlertDialogBuilder(requireContext()).create().also {
+            it.setTitle("School Name Filter")
+            it.setIcon(R.drawable.institution)
+            it.setMessage("Select the school you want to view the records.")
+            it.setButton(AlertDialog.BUTTON_POSITIVE, "Ok") { _, _ ->
+                Log.d("ASP", editText.text.toString())
+                com.jehubasa.adassubmissionlog.FirebaseDatabase()
+                    .fetchDataSubmissionSchool(dbRef, editText.text.toString()) { schoolFiltered ->
+                        binding.statusTableLayout.removeViews(
+                            1,
+                            max(0, binding.statusTableLayout.childCount - 1)
+                        )
+                        loadTOTable(schoolFiltered)
+                    }
+            }
+        }
+        alertDialog.setView(view)
+        alertDialog.show()
     }
 
     private fun saveData() {
@@ -122,79 +182,86 @@ class CheckStatusFragment : Fragment() {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val date1 = dateFormat.format(Date(it.first))
             val date2 = dateFormat.format(Date(it.second))
-            binding.statusTableLayout.removeViews(1, max(0, binding.statusTableLayout.childCount-1))
+            binding.statusTableLayout.removeViews(
+                1,
+                max(0, binding.statusTableLayout.childCount - 1)
+            )
             retrieveData(date1, date2)
         }
 
     }
 
     private fun retrieveData(date1: String, date2: String) {
+        com.jehubasa.adassubmissionlog.FirebaseDatabase()
+            .fetchDataSubmissionDateRange(dbRef, date1, date2) {
+                loadTOTable(it)
+            }
 
-        val dbRef = FirebaseDatabase.getInstance().getReference(getString(R.string.firebase_liquidationLog_ref))
+    }
 
-        com.jehubasa.adassubmissionlog.FirebaseDatabase().fetchDataSubmissionDateRange(dbRef,date1,date2){
-            if(!it.isNullOrEmpty()){
+    private fun loadTOTable(it: ArrayList<SubmissionDataClass>) {
+        if (it.isNotEmpty()) {
 
-                binding.statusProgress.visibility = View.GONE
-                binding.statusInstruction.visibility = View.GONE
-                val tableLayout  = binding.statusTableLayout
+            binding.statusProgress.visibility = View.GONE
+            binding.statusInstruction.visibility = View.GONE
+            val tableLayout = binding.statusTableLayout
 
-                for (d in it.indices) {
-                    val dataRow = TableRow(context)
-                    dataRow.addView(TextView(context).apply {
-                        text = it[d].sch
-                        setTextColor(Color.BLACK)
-                        setPadding(10, 10, 10, 10)
-                        gravity = Gravity.CENTER
-                    })
-                    dataRow.addView(TextView(context).apply {
-                        text = it[d].typ
-                        setPadding(10, 10, 10, 10)
-                        gravity = Gravity.CENTER
-                    })
+            for (d in it.indices) {
+                val dataRow = TableRow(context)
+                dataRow.addView(TextView(context).apply {
+                    text = it[d].sch
+                    setTextColor(Color.BLACK)
+                    setPadding(10, 10, 10, 10)
+                    gravity = Gravity.CENTER
+                })
+                dataRow.addView(TextView(context).apply {
+                    text = it[d].typ
+                    setPadding(10, 10, 10, 10)
+                    gravity = Gravity.CENTER
+                })
 
-                    dataRow.addView(TextView(context).apply {
-                        text = it[d].ds
-                        setPadding(10, 10, 10, 10)
-                        gravity = Gravity.CENTER
-                    })
+                dataRow.addView(TextView(context).apply {
+                    text = it[d].ds
+                    setPadding(10, 10, 10, 10)
+                    gravity = Gravity.CENTER
+                })
 
-                    dataRow.addView(TextView(context).apply {
-                        text = it[d].dr
-                        setPadding(10, 10, 10, 10)
-                        gravity = Gravity.CENTER
-                    })
+                dataRow.addView(TextView(context).apply {
+                    text = it[d].dr
+                    setPadding(10, 10, 10, 10)
+                    gravity = Gravity.CENTER
+                })
 
-                    dataRow.addView(TextView(context).apply {
-                        text = it[d].tos.toString()
-                        setPadding(10, 10, 10, 10)
-                        gravity = Gravity.CENTER
-                    })
+                dataRow.addView(TextView(context).apply {
+                    text = it[d].tos.toString()
+                    setPadding(10, 10, 10, 10)
+                    gravity = Gravity.CENTER
+                })
 
-                    dataRow.addView(TextView(context).apply {
-                        text = it[d].sb
-                        setPadding(10, 10, 10, 10)
-                        gravity = Gravity.CENTER
-                    })
+                dataRow.addView(TextView(context).apply {
+                    text = it[d].sb
+                    setPadding(10, 10, 10, 10)
+                    gravity = Gravity.CENTER
+                })
 
-                    dataRow.addView(TextView(context).apply {
-                        text = it[d].rt
-                        setPadding(10, 10, 10, 10)
-                        gravity = Gravity.CENTER
-                    })
+                dataRow.addView(TextView(context).apply {
+                    text = it[d].rt
+                    setPadding(10, 10, 10, 10)
+                    gravity = Gravity.CENTER
+                })
 
-                    dataRow.addView(TextView(context).apply {
-                        text = it[d].tsd
-                        setPadding(10, 10, 10, 10)
-                        gravity = Gravity.CENTER
-                    })
+                dataRow.addView(TextView(context).apply {
+                    text = it[d].tsd
+                    setPadding(10, 10, 10, 10)
+                    gravity = Gravity.CENTER
+                })
 
-                    tableLayout.addView(dataRow)
-                    data = it
-                    binding.statusNoItems.text = it.size.toString()
-                }
-            } else {Toast.makeText(requireContext(), "No existing data", Toast.LENGTH_LONG).show()}
+                tableLayout.addView(dataRow)
+                data = it
+                binding.statusNoItems.text = it.size.toString()
+            }
+        } else {
+            Toast.makeText(requireContext(), "No existing data", Toast.LENGTH_LONG).show()
         }
-
     }
 }
