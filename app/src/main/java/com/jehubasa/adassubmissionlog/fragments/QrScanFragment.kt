@@ -164,15 +164,25 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
             }
         }
 
+        Log.d("ASP", binding.rgTypeOfLr.checkedRadioButtonId.toString())
+
         binding.rgTypeOfLr.setOnCheckedChangeListener { _, _ ->
-            binding.qrScanDateSubmission.setText("")
-            binding.qrScanDateRelease.setText("")
-            binding.qrScanSubmittedBy.setText("")
-            binding.qrScanReleasedTo.setText("")
-            binding.qrScanReleasedToSamePersonCheckbox.isChecked = false
-            binding.qrScanSubmittedDivCheckBox.isChecked = false
-            binding.qrScanSubmittedDivisionDate.setText("")
-            binding.qrScanTimesSubmitted.setText("")
+            with(binding){
+                qrScanDateSubmission.setText("")
+                qrScanDateRelease.setText("")
+                qrScanSubmittedBy.setText("")
+                qrScanReleasedTo.setText("")
+                qrScanReleasedToSamePersonCheckbox.isChecked = false
+                qrScanSubmittedDivCheckBox.isChecked = false
+                qrScanSubmittedDivisionDate.setText("")
+                qrScanTimesSubmitted.setText("")
+
+                if(rgTypeOfLr.checkedRadioButtonId == R.id.qr_scan_add){
+                    tilQrScanAdditional.visibility =View.VISIBLE
+                } else{
+                    tilQrScanAdditional.visibility =View.GONE
+                }
+            }
         }
 
         binding.qrScanClearSubmission.setOnClickListener {
@@ -280,7 +290,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
                 tempLrType = resources.getStringArray(R.array.lr_types)[3]
             }
             R.id.qr_scan_add -> {
-                tempLrType = resources.getStringArray(R.array.lr_types)[4]
+                tempLrType = "${resources.getStringArray(R.array.lr_types)[4]}--${binding.qrScanAdditional.text}"
             }
         }
     }
@@ -352,6 +362,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
 
     private fun saveData() {
 
+        getCheckedTypeOfLr()
         val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance()
             .getReference(getString(R.string.firebase_liquidationLog_ref))
 
@@ -520,6 +531,9 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
             }
             typeLR[4] -> {
                 binding.qrScanAdd.isChecked = true
+            } else -> {
+             binding.qrScanAdd.isChecked = true
+             binding.qrScanAdditional.setText(data.typ?.split("--")!![1])
             }
         }
 

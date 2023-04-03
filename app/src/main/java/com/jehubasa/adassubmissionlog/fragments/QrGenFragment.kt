@@ -260,7 +260,6 @@ class QrGenFragment : Fragment() {
         binding.qrLayoutSchHead.text = "Head: ${binding.qrGenSchoolHead.text}"
     }
 
-
     private fun generateQR(qrCodeContent: String): Bitmap {
         val size = 512 //pixels
         Log.d("ASP", qrCodeContent)

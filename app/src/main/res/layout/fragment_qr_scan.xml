@@ -167,11 +167,29 @@
                         android:text="@string/additional" />
                 </RadioGroup>
 
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_qr_scan_additional"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/additions"
+                    android:visibility="gone"
+                    app:endIconMode="clear_text">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/qr_scan_additional"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:text="Face Towels" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:weightSum="2">
+                    android:weightSum="2"
+                    android:layout_marginTop="10dp">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/til_qr_scan_date_submission"

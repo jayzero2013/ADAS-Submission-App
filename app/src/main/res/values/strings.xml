@@ -46,7 +46,7 @@
     <string name="_2nd">2nd</string>
     <string name="_3rd">3rd</string>
     <string name="_4th">4th</string>
-    <string name="additional">Additional</string>
+    <string name="additional">Additions</string>
     <string name="passed_to_division">Passed to Division:</string>
     <string name="old_data">old_data</string>
     <string name="just_a_decorative_image">just a decorative image</string>
@@ -72,6 +72,7 @@
     <string name="imagebackground">imagebackground</string>
     <string name="type_of_liquidation_report_label">Type of liquidation report</string>
     <string name="status_instructions">This page will show all the existing data you entered.\nTo start, tap the filter button and input the range of the\n submission date you want to show.\n\n You can save the table as PDF by tapping\n the save button on the upper right corner.</string>
+    <string name="additions">Additions</string>
 
     <string-array name="lr_types">
         <item>1st Quarter</item>
