@@ -96,9 +96,14 @@ class FirebaseDatabase() {
     ) {
         val updateMap: Map<String, Any> = data.toMap()
         dbRef.child(id).setValue(updateMap)
-        dbRef.addListenerForSingleValueEvent(object : ValueEventListener{
+        dbRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                Log.d("ASP", "Data updated successfully ${snapshot.getValue(SubmissionDataClass::class.java).toString()}")
+                Log.d(
+                    "ASP",
+                    "Data updated successfully ${
+                        snapshot.getValue(SubmissionDataClass::class.java).toString()
+                    }"
+                )
                 callback(true)
             }
 
@@ -114,7 +119,7 @@ class FirebaseDatabase() {
         startDate: String,
         endDate: String,
         callback: (ArrayList<SubmissionDataClass>) -> Unit
-    ){
+    ) {
         val temp: ArrayList<SubmissionDataClass> = arrayListOf()
 
         val query = dbRef.orderByChild("ds").startAt(startDate).endAt(endDate)
@@ -141,11 +146,39 @@ class FirebaseDatabase() {
         })
     }
 
+    fun deleteDataSubmissionDateRange(
+        dbRef: DatabaseReference,
+        startDate: String,
+        endDate: String,
+        callback: (Boolean) -> Unit
+    ) {
+        val query = dbRef.orderByChild("ds").startAt(startDate).endAt(endDate)
+
+        query.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    for (snap in snapshot.children) {
+                        snap.ref.removeValue()
+                    }
+                    callback(true)
+
+                } else {
+                    Log.d("ASP", "Error on deleting data.")
+                    callback(false)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.d("ASP", "data fetch error")
+            }
+        })
+    }
+
     fun fetchDataSubmissionSchool(
         dbRef: DatabaseReference,
         sch: String,
         callback: (ArrayList<SubmissionDataClass>) -> Unit
-    ){
+    ) {
         val temp: ArrayList<SubmissionDataClass> = arrayListOf()
 
         val query = dbRef.orderByChild("sch").equalTo(sch)

@@ -19,6 +19,7 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
+import com.google.firebase.database.DatabaseReference
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
@@ -35,6 +36,10 @@ class QrGenFragment : Fragment() {
 
     private lateinit var binding: FragmentQrGenBinding
     private var storedData: ArrayList<QrInfoDataClass> = arrayListOf()
+    private val dbRef: DatabaseReference by lazy {
+        com.google.firebase.database.FirebaseDatabase.getInstance()
+            .getReference(getString(R.string.firebase_qrdata_ref))
+    }
 
     private val date: String by lazy {
         val calendar = Calendar.getInstance()
@@ -74,6 +79,7 @@ class QrGenFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        dbRef.keepSynced(true)
         //initSpinner()
         initAutoComplete()
 
@@ -149,9 +155,7 @@ class QrGenFragment : Fragment() {
 
         val schRecentData = ArrayList<String?>()
         val schHeadRecentData = ArrayList<String?>()
-        FirebaseDatabase().fetchDataQR(
-            com.google.firebase.database.FirebaseDatabase.getInstance()
-                .getReference(getString(R.string.firebase_qrdata_ref))
+        FirebaseDatabase().fetchDataQR(dbRef
         ) {
             storedData = it
             for (content in it) {
@@ -182,8 +186,6 @@ class QrGenFragment : Fragment() {
                 binding.qrGenSchoolHead.text.toString()
             )
         ) {
-            val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance()
-                .getReference(getString(R.string.firebase_qrdata_ref))
             val id = dbRef.push().key!!
             FirebaseDatabase().initQrDatabase(
                 dbRef,

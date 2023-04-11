@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.jehubasa.adassubmissionlog.QrGenDataBaseHelper
@@ -40,6 +41,7 @@ class CheckStatusFragment : Fragment() {
     private val dbRef: DatabaseReference by lazy {
         FirebaseDatabase.getInstance().getReference(getString(R.string.firebase_liquidationLog_ref))
     }
+    private var filteredDates: MutableList<String> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,6 +57,9 @@ class CheckStatusFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        dbRef.keepSynced(true)
+        Log.d("ASP", "Firebase UID: ${FirebaseAuth.getInstance().currentUser?.uid}")
 
         with(binding) {
             statusDateFilterButton.setOnClickListener {
@@ -74,11 +79,13 @@ class CheckStatusFragment : Fragment() {
                     statusDateFilterButton.show()
                     statusPrintButton.show()
                     statusSchoolFilterButton.show()
+                    statusDeleteButton.show()
                     fabState = true
                 } else {
                     statusDateFilterButton.hide()
                     statusPrintButton.hide()
                     statusSchoolFilterButton.hide()
+                    statusDeleteButton.hide()
                     fabState = false
                 }
             }
@@ -86,10 +93,32 @@ class CheckStatusFragment : Fragment() {
             statusSchoolFilterButton.setOnClickListener {
                 schoolFilter()
             }
+
+            statusDeleteButton.setOnClickListener {
+                if (data.isNotEmpty() && filteredDates.isNotEmpty()) {
+                    deleteData()
+                } else {
+                    Toast.makeText(requireContext(), "No Data", Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 
+    private fun deleteData() {
+        com.jehubasa.adassubmissionlog.FirebaseDatabase()
+            .deleteDataSubmissionDateRange(dbRef, filteredDates[0], filteredDates[1]) {
+                if (it) {
+                    dbRef.keepSynced(true)
+                    Toast.makeText(requireContext(), "Data Deleted", Toast.LENGTH_LONG).show()
+                    binding.statusTableLayout.invalidate()
+                    retrieveData(filteredDates[0], filteredDates[1])
+                    filteredDates.clear()
+                }
+            }
+    }
+
     private fun schoolFilter() {
+        dbRef.keepSynced(true)
         val view = layoutInflater.inflate(R.layout.alert_dialog_school_filter, null)
         val editText = view.findViewById<MaterialAutoCompleteTextView>(R.id.filter_school)
         //fill the autocomplete of schools
@@ -166,6 +195,7 @@ class CheckStatusFragment : Fragment() {
 
 
     private fun openCalendar() {
+        filteredDates.clear()
         val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
             .setTitleText("Select date range")
             .setSelection(
@@ -187,21 +217,22 @@ class CheckStatusFragment : Fragment() {
                 max(0, binding.statusTableLayout.childCount - 1)
             )
             retrieveData(date1, date2)
+            filteredDates.add(date1)
+            filteredDates.add(date2)
         }
 
     }
 
     private fun retrieveData(date1: String, date2: String) {
+        dbRef.keepSynced(true)
         com.jehubasa.adassubmissionlog.FirebaseDatabase()
             .fetchDataSubmissionDateRange(dbRef, date1, date2) {
                 loadTOTable(it)
             }
-
     }
 
     private fun loadTOTable(it: ArrayList<SubmissionDataClass>) {
         if (it.isNotEmpty()) {
-
             binding.statusProgress.visibility = View.GONE
             binding.statusInstruction.visibility = View.GONE
             val tableLayout = binding.statusTableLayout
@@ -262,6 +293,14 @@ class CheckStatusFragment : Fragment() {
             }
         } else {
             Toast.makeText(requireContext(), "No existing data", Toast.LENGTH_LONG).show()
+            filteredDates.clear()
+            binding.statusProgress.visibility = View.GONE
+            binding.statusInstruction.visibility = View.VISIBLE
+            binding.statusNoItems.text = ""
+            for (i in 1 until binding.statusTableLayout.childCount) {
+                val row = binding.statusTableLayout.getChildAt(i)
+                binding.statusTableLayout.removeView(row)
+            }
         }
     }
 }

@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.database.DatabaseReference
 import com.jehubasa.adassubmissionlog.FirebaseDatabase
 import com.jehubasa.adassubmissionlog.QRCodeAnalyzer
 import com.jehubasa.adassubmissionlog.QrGenDataBaseHelper
@@ -49,6 +50,9 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     private var tempLrType: String = ""
     private var oldData: List<SubmissionDataClass> = listOf()
     private var isQrdataprocessingLoaded = false
+    private val dbRef: DatabaseReference by lazy {
+        com.google.firebase.database.FirebaseDatabase.getInstance().getReference(getString(R.string.firebase_liquidationLog_ref))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,7 +83,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        dbRef.keepSynced(true)
         binding.qrScanReopen.setOnClickListener {
             startCamera()
             resetViews()
@@ -161,7 +165,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
         Log.d("ASP", binding.rgTypeOfLr.checkedRadioButtonId.toString())
 
         binding.rgTypeOfLr.setOnCheckedChangeListener { _, _ ->
-            with(binding){
+            with(binding) {
                 qrScanDateSubmission.setText("")
                 qrScanDateRelease.setText("")
                 qrScanSubmittedBy.setText("")
@@ -171,10 +175,10 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
                 qrScanSubmittedDivisionDate.setText("")
                 qrScanTimesSubmitted.setText("")
 
-                if(rgTypeOfLr.checkedRadioButtonId == R.id.qr_scan_add){
-                    tilQrScanAdditional.visibility =View.VISIBLE
-                } else{
-                    tilQrScanAdditional.visibility =View.GONE
+                if (rgTypeOfLr.checkedRadioButtonId == R.id.qr_scan_add) {
+                    tilQrScanAdditional.visibility = View.VISIBLE
+                } else {
+                    tilQrScanAdditional.visibility = View.GONE
                 }
             }
         }
@@ -242,11 +246,8 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
 
     private fun updateData(id: String?) {
 
-        val dbref = com.google.firebase.database.FirebaseDatabase.getInstance()
-            .getReference(getString(R.string.firebase_liquidationLog_ref))
-
         FirebaseDatabase().updateDataSubmission(
-            dbref, getString(R.string.firebase_liquidationLog_ref), id!!,
+            dbRef, getString(R.string.firebase_liquidationLog_ref), id!!,
             SubmissionDataClass(
                 id,
                 binding.qrScanSchoolName.text.toString(),
@@ -284,7 +285,13 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
                 tempLrType = resources.getStringArray(R.array.lr_types)[3]
             }
             R.id.qr_scan_add -> {
-                tempLrType = "${resources.getStringArray(R.array.lr_types)[4]}--${binding.qrScanAdditional.text}"
+                tempLrType = "${resources.getStringArray(R.array.lr_types)[4]}--${
+                    if (binding.qrScanAdditional.text.isNullOrEmpty()) {
+                        "Not entered."
+                    } else {
+                        binding.qrScanAdditional.text
+                    }
+                }"
             }
         }
     }
@@ -357,8 +364,6 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     private fun saveData() {
 
         getCheckedTypeOfLr()
-        val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance()
-            .getReference(getString(R.string.firebase_liquidationLog_ref))
 
         val id = dbRef.push().key!!
         FirebaseDatabase().initLiquidationDatabase(
@@ -477,9 +482,6 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     }
 
     private fun checkOldData() {
-        val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance()
-            .getReference(getString(R.string.firebase_liquidationLog_ref))
-
         FirebaseDatabase().fetchDataSubmission(dbRef, qrRead[0]) {
             binding.qrScanProgress.visibility = View.GONE
             oldData = it
@@ -499,6 +501,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     override fun onDestroy() {
         super.onDestroy()
     }
+
     private fun requestCameraPermission() {
         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
     }
@@ -506,7 +509,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
     override fun exitListener(data: SubmissionDataClass) {
         scannedData = data
         binding.qrScanSchoolName.text = data.sch
-        checkHead(data.sch!!){
+        checkHead(data.sch!!) {
             binding.qrScanHead.text = it
         }
         val typeLR = resources.getStringArray(R.array.lr_types)
@@ -525,9 +528,10 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
             }
             typeLR[4] -> {
                 binding.qrScanAdd.isChecked = true
-            } else -> {
-             binding.qrScanAdd.isChecked = true
-             binding.qrScanAdditional.setText(data.typ?.split("--")!![1])
+            }
+            else -> {
+                binding.qrScanAdd.isChecked = true
+                binding.qrScanAdditional.setText(data.typ?.split("--")!![1])
             }
         }
 
@@ -549,7 +553,7 @@ class QrScanFragment : Fragment(), QrScanDialogFragment.OnDialogExitListener {
 
     }
 
-    private fun checkHead(sch: String, callback : (String?) -> Unit){
+    private fun checkHead(sch: String, callback: (String?) -> Unit) {
         FirebaseDatabase().fetchDataQR(
             com.google.firebase.database.FirebaseDatabase.getInstance()
                 .getReference(getString(R.string.firebase_qrdata_ref))
